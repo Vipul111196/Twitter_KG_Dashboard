@@ -14,9 +14,8 @@ services:
       NEO4J_dbms_security_procedures_unrestricted: apoc.*
       NEO4J_dbms_security_procedures_allowlist: apoc.*
     volumes:
-      - neo4j_data:/data
+      - twitter-neo4j-data:/data
       - neo4j_logs:/logs
-      - ./import:/import
     healthcheck:
       test: ["CMD-SHELL", "cypher-shell -u neo4j -p password 'RETURN 1'"]
       interval: 10s
@@ -25,6 +24,7 @@ services:
     restart: unless-stopped
 
 volumes:
-  neo4j_data:
+  twitter-neo4j-data:
+    external: true
   neo4j_logs:
 
