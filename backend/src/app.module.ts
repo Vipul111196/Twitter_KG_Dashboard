@@ -6,6 +6,7 @@ import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { Neo4jModule } from './database/neo4j.module';
+import { UsersModule } from './modules/users/users.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -27,6 +28,9 @@ import configuration from './config/configuration';
     
     // Neo4j database module
     Neo4jModule,
+    
+    // Feature modules
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
