@@ -8,6 +8,8 @@ import { AppService } from './app.service';
 import { Neo4jModule } from './database/neo4j.module';
 import { UsersModule } from './modules/users/users.module';
 import { TweetsModule } from './modules/tweets/tweets.module';
+import { HashtagsModule } from './modules/hashtags/hashtags.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -33,6 +35,8 @@ import configuration from './config/configuration';
     // Feature modules
     UsersModule,
     TweetsModule,
+    HashtagsModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
