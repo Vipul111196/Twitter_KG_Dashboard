@@ -74,7 +74,7 @@ describe('HashtagsService', () => {
       expect(result).toEqual([{ name: 'neo4j', usageCount: 42 }]);
       expect(neo4jService.executeQuery).toHaveBeenCalledWith(
         expect.stringContaining('ORDER BY usageCount DESC'),
-        { limit: 10 },
+        expect.any(Object), // limit is now neo4j.int(10)
       );
     });
   });

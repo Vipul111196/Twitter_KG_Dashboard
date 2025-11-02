@@ -45,8 +45,6 @@ infrastructure/logs/
 *.tmp
 .cache/
 
-# Personal learning notes (not for repo)
-docs/phase-1-notes/
-docs/phase-2-notes/
+# Temporary Documentation
 docs/phase-*-notes/
 

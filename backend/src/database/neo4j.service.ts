@@ -24,9 +24,11 @@ export class Neo4jService implements OnModuleInit, OnModuleDestroy {
    * Initialize Neo4j driver on module startup
    */
   async onModuleInit() {
-    const uri = this.configService.get<string>('NEO4J_URI') || 'bolt://localhost:7687';
-    const username = this.configService.get<string>('NEO4J_USERNAME') || 'neo4j';
-    const password = this.configService.get<string>('NEO4J_PASSWORD') || 'password';
+    const uri = this.configService.get<string>('neo4j.uri') || 'bolt://localhost:7687';
+    const username = this.configService.get<string>('neo4j.username') || 'neo4j';
+    const password = this.configService.get<string>('neo4j.password') || 'password';
+
+    console.log('🔌 Connecting to Neo4j:', uri);
 
     // Create driver instance
     this.driver = neo4j.driver(uri, neo4j.auth.basic(username, password));

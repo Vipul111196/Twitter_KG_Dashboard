@@ -112,5 +112,43 @@ export class UsersResolver {
   async totalUsers(): Promise<number> {
     return this.usersService.getTotalUserCount();
   }
+
+  /**
+   * Get users who follow the specified user
+   */
+  @Query(() => [User], {
+    description: 'Get users who follow the specified user',
+  })
+  async followers(
+    @Args('screenName', { type: () => String, description: 'User screen name' })
+    screenName: string,
+    @Args('limit', {
+      type: () => Int,
+      defaultValue: 20,
+      description: 'Maximum results to return',
+    })
+    limit: number = 20,
+  ): Promise<User[]> {
+    return this.usersService.getFollowers(screenName, limit);
+  }
+
+  /**
+   * Get users that the specified user follows
+   */
+  @Query(() => [User], {
+    description: 'Get users that the specified user follows',
+  })
+  async following(
+    @Args('screenName', { type: () => String, description: 'User screen name' })
+    screenName: string,
+    @Args('limit', {
+      type: () => Int,
+      defaultValue: 20,
+      description: 'Maximum results to return',
+    })
+    limit: number = 20,
+  ): Promise<User[]> {
+    return this.usersService.getFollowing(screenName, limit);
+  }
 }
 

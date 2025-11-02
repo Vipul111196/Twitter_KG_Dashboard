@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import neo4j from 'neo4j-driver';
 import { Neo4jService } from '../../database/neo4j.service';
 import { Tweet, TweetWithAuthor, Hashtag } from './tweets.types';
 import { User } from '../users/users.types';
@@ -44,7 +45,7 @@ export class TweetsService {
 
     const result = await this.neo4jService.executeQuery(query, {
       screenName,
-      limit,
+      limit: neo4j.int(limit),
     });
 
     return result.records.map((record) =>
@@ -65,7 +66,7 @@ export class TweetsService {
 
     const result = await this.neo4jService.executeQuery(query, {
       hashtagName,
-      limit,
+      limit: neo4j.int(limit),
     });
 
     return result.records.map((record) =>
@@ -87,7 +88,7 @@ export class TweetsService {
 
     const result = await this.neo4jService.executeQuery(cypherQuery, {
       query,
-      limit,
+      limit: neo4j.int(limit),
     });
 
     return result.records.map((record) =>
@@ -107,7 +108,7 @@ export class TweetsService {
       LIMIT $limit
     `;
 
-    const result = await this.neo4jService.executeQuery(query, { limit });
+    const result = await this.neo4jService.executeQuery(query, { limit: neo4j.int(limit) });
 
     return result.records.map((record) =>
       this.mapNodeToTweet(record.get('t')),
@@ -190,7 +191,7 @@ export class TweetsService {
       created_at: props.created_at
         ? new Date(props.created_at).toISOString()
         : undefined,
-      favorites: props.favorites,
+      favorites: this.extractNumber(props.favorites),
       import_method: props.import_method,
     };
   }
@@ -204,8 +205,8 @@ export class TweetsService {
     return {
       screen_name: props.screen_name,
       name: props.name,
-      followers: props.followers,
-      following: props.following,
+      followers: this.extractNumber(props.followers),
+      following: this.extractNumber(props.following),
       profile_image_url: props.profile_image_url,
       location: props.location,
       url: props.url,

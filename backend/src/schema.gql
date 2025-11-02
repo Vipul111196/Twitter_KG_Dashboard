@@ -1,0 +1,272 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+"""Dashboard statistics"""
+type DashboardStats {
+  """Total hashtags"""
+  totalHashtags: Int!
+
+  """Total relationships"""
+  totalRelationships: Int!
+
+  """Total tweets"""
+  totalTweets: Int!
+
+  """Total users"""
+  totalUsers: Int!
+}
+
+"""Twitter hashtag"""
+type Hashtag {
+  """Hashtag name (without #)"""
+  name: ID!
+}
+
+"""Hashtag with usage statistics"""
+type HashtagStats {
+  """Hashtag name"""
+  name: ID!
+
+  """Number of tweets using this hashtag"""
+  usageCount: Int!
+}
+
+"""Network data for graph visualization"""
+type NetworkData {
+  """Network edges"""
+  edges: [NetworkEdge!]!
+
+  """Network nodes"""
+  nodes: [NetworkNode!]!
+}
+
+"""Network edge for visualization"""
+type NetworkEdge {
+  """Source node ID"""
+  source: String!
+
+  """Target node ID"""
+  target: String!
+
+  """Relationship type"""
+  type: String!
+}
+
+"""Network node for visualization"""
+type NetworkNode {
+  """Node ID"""
+  id: String!
+
+  """Node label"""
+  label: String!
+
+  """Node size/weight"""
+  size: Int
+
+  """Node type"""
+  type: String!
+}
+
+type Query {
+  """Get dashboard statistics"""
+  dashboardStats: DashboardStats!
+
+  """Get users who follow the specified user"""
+  followers(
+    """Maximum results to return"""
+    limit: Int! = 20
+
+    """User screen name"""
+    screenName: String!
+  ): [User!]!
+
+  """Get users that the specified user follows"""
+  following(
+    """Maximum results to return"""
+    limit: Int! = 20
+
+    """User screen name"""
+    screenName: String!
+  ): [User!]!
+
+  """Get hashtag by name"""
+  hashtag(name: String!): Hashtag
+
+  """Get network data for visualization"""
+  networkData(limit: Int! = 100): NetworkData!
+
+  """Get most recent tweets"""
+  recentTweets(
+    """Maximum results to return"""
+    limit: Int! = 20
+  ): [Tweet!]!
+
+  """Search tweets by text content"""
+  searchTweets(
+    """Maximum results to return"""
+    limit: Int! = 20
+
+    """Search query"""
+    query: String!
+  ): [Tweet!]!
+
+  """Search users by screen name or display name"""
+  searchUsers(
+    """Maximum results to return"""
+    limit: Int! = 10
+
+    """Search query"""
+    query: String!
+  ): [User!]!
+
+  """Get top users by follower count"""
+  topUsers(
+    """Number of top users to return"""
+    limit: Int! = 10
+  ): [User!]!
+
+  """Get total number of hashtags"""
+  totalHashtags: Int!
+
+  """Get total number of tweets"""
+  totalTweets: Int!
+
+  """Get total number of users"""
+  totalUsers: Int!
+
+  """Get trending hashtags with usage counts"""
+  trendingHashtags(limit: Int! = 10): [HashtagStats!]!
+
+  """Get tweet by ID with author and hashtags"""
+  tweet(
+    """Tweet ID"""
+    id: String!
+  ): TweetWithAuthor
+
+  """Get tweets containing a specific hashtag"""
+  tweetsByHashtag(
+    """Hashtag name"""
+    hashtagName: String!
+
+    """Maximum results to return"""
+    limit: Int! = 20
+  ): [Tweet!]!
+
+  """Get tweets posted by a user"""
+  tweetsByUser(
+    """Maximum results to return"""
+    limit: Int! = 20
+
+    """User screen name"""
+    screenName: String!
+  ): [Tweet!]!
+
+  """Get user by screen name (Twitter handle)"""
+  user(
+    """User screen name"""
+    screenName: String!
+  ): User
+
+  """Get user activity statistics"""
+  userStats(
+    """User screen name"""
+    screenName: String!
+  ): UserStats
+
+  """Get users with minimum follower count"""
+  usersByMinFollowers(
+    """Maximum results to return"""
+    limit: Int! = 10
+
+    """Minimum follower count"""
+    minFollowers: Int!
+  ): [User!]!
+}
+
+"""Twitter tweet/post"""
+type Tweet {
+  """Creation timestamp"""
+  created_at: String
+
+  """Number of favorites/likes"""
+  favorites: Int
+
+  """Unique tweet ID"""
+  id: ID!
+
+  """Tweet ID as string"""
+  id_str: String!
+
+  """Import method"""
+  import_method: String
+
+  """Tweet text content"""
+  text: String!
+}
+
+"""Tweet with author information"""
+type TweetWithAuthor {
+  """User who posted the tweet"""
+  author: User
+
+  """Creation timestamp"""
+  created_at: String
+
+  """Number of favorites/likes"""
+  favorites: Int
+
+  """Hashtags used in tweet"""
+  hashtags: [Hashtag!]
+
+  """Unique tweet ID"""
+  id: ID!
+
+  """Tweet ID as string"""
+  id_str: String!
+
+  """Import method"""
+  import_method: String
+
+  """Tweet text content"""
+  text: String!
+}
+
+"""Twitter user"""
+type User {
+  """Number of followers"""
+  followers: Int
+
+  """Number of accounts followed"""
+  following: Int
+
+  """User location"""
+  location: String
+
+  """Display name"""
+  name: String!
+
+  """Profile image URL"""
+  profile_image_url: String
+
+  """Unique screen name (@username)"""
+  screen_name: ID!
+
+  """Profile URL"""
+  url: String
+}
+
+"""User activity statistics"""
+type UserStats {
+  """Total followers"""
+  followerCount: Int!
+
+  """Total following"""
+  followingCount: Int!
+
+  """Total tweets posted"""
+  tweetCount: Int!
+
+  """Unique hashtags used"""
+  uniqueHashtagsUsed: Int!
+}

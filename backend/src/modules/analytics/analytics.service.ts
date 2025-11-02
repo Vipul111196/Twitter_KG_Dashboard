@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import neo4j from 'neo4j-driver';
 import { Neo4jService } from '../../database/neo4j.service';
 import { DashboardStats, NetworkData, NetworkNode, NetworkEdge } from './analytics.types';
 
@@ -37,7 +38,7 @@ export class AnalyticsService {
       LIMIT $limit
     `;
 
-    const result = await this.neo4jService.executeQuery(query, { limit });
+    const result = await this.neo4jService.executeQuery(query, { limit: neo4j.int(limit) });
 
     const nodes: Map<string, NetworkNode> = new Map();
     const edges: NetworkEdge[] = [];
@@ -56,7 +57,7 @@ export class AnalyticsService {
           id: u1Props.screen_name,
           label: u1Props.name || u1Props.screen_name,
           type: 'user',
-          size: u1Props.followers || 0,
+          size: this.extractNumber(u1Props.followers),
         });
       }
 
@@ -65,7 +66,7 @@ export class AnalyticsService {
           id: u2Props.screen_name,
           label: u2Props.name || u2Props.screen_name,
           type: 'user',
-          size: u2Props.followers || 0,
+          size: this.extractNumber(u2Props.followers),
         });
       }
 

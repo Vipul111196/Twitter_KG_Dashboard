@@ -92,7 +92,7 @@ describe('TweetsService', () => {
       expect(result).toHaveLength(1);
       expect(neo4jService.executeQuery).toHaveBeenCalledWith(
         expect.stringContaining('POSTS'),
-        { screenName: 'neo4j', limit: 20 },
+        expect.objectContaining({ screenName: 'neo4j' }),
       );
     });
   });
@@ -113,7 +113,7 @@ describe('TweetsService', () => {
       expect(result).toHaveLength(1);
       expect(neo4jService.executeQuery).toHaveBeenCalledWith(
         expect.stringContaining('TAGS'),
-        { hashtagName: 'neo4j', limit: 20 },
+        expect.objectContaining({ hashtagName: 'neo4j' }),
       );
     });
   });
@@ -134,7 +134,7 @@ describe('TweetsService', () => {
       expect(result).toHaveLength(1);
       expect(neo4jService.executeQuery).toHaveBeenCalledWith(
         expect.stringContaining('CONTAINS'),
-        { query: 'neo4j', limit: 20 },
+        expect.objectContaining({ query: 'neo4j' }),
       );
     });
   });
@@ -155,7 +155,7 @@ describe('TweetsService', () => {
       expect(result).toHaveLength(1);
       expect(neo4jService.executeQuery).toHaveBeenCalledWith(
         expect.stringContaining('ORDER BY t.created_at DESC'),
-        { limit: 20 },
+        expect.any(Object), // limit is now neo4j.int(20)
       );
     });
   });

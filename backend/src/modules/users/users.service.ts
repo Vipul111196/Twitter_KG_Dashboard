@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import neo4j from 'neo4j-driver';
 import { Neo4jService } from '../../database/neo4j.service';
 import { User, UserStats } from './users.types';
 
@@ -61,7 +62,7 @@ export class UsersService {
 
     const result = await this.neo4jService.executeQuery(cypherQuery, {
       query: query.toLowerCase(),
-      limit,
+      limit: neo4j.int(limit), // Convert to Neo4j Integer
     });
 
     return result.records.map((record) =>
@@ -180,6 +181,56 @@ export class UsersService {
   }
 
   /**
+   * Get users who follow the specified user
+   * 
+   * @param screenName - User's screen name
+   * @param limit - Maximum number of followers to return
+   * @returns Array of follower users
+   */
+  async getFollowers(screenName: string, limit: number = 20): Promise<User[]> {
+    const query = `
+      MATCH (follower:User)-[:FOLLOWS]->(user:User {screen_name: $screenName})
+      RETURN follower
+      ORDER BY follower.followers DESC
+      LIMIT $limit
+    `;
+
+    const result = await this.neo4jService.executeQuery(query, {
+      screenName,
+      limit: neo4j.int(limit),
+    });
+
+    return result.records.map((record) =>
+      this.mapNodeToUser(record.get('follower')),
+    );
+  }
+
+  /**
+   * Get users that the specified user follows
+   * 
+   * @param screenName - User's screen name
+   * @param limit - Maximum number of following to return
+   * @returns Array of users being followed
+   */
+  async getFollowing(screenName: string, limit: number = 20): Promise<User[]> {
+    const query = `
+      MATCH (user:User {screen_name: $screenName})-[:FOLLOWS]->(following:User)
+      RETURN following
+      ORDER BY following.followers DESC
+      LIMIT $limit
+    `;
+
+    const result = await this.neo4jService.executeQuery(query, {
+      screenName,
+      limit: neo4j.int(limit),
+    });
+
+    return result.records.map((record) =>
+      this.mapNodeToUser(record.get('following')),
+    );
+  }
+
+  /**
    * Helper: Map Neo4j node to User type
    * Handles both node objects and plain objects
    */
@@ -190,8 +241,8 @@ export class UsersService {
     return {
       screen_name: props.screen_name,
       name: props.name,
-      followers: props.followers,
-      following: props.following,
+      followers: this.extractNumber(props.followers),
+      following: this.extractNumber(props.following),
       profile_image_url: props.profile_image_url,
       location: props.location,
       url: props.url,

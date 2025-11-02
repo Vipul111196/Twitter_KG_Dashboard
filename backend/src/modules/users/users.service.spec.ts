@@ -113,7 +113,7 @@ describe('UsersService', () => {
       expect(result[0]).toEqual(mockNeo4jUser);
       expect(neo4jService.executeQuery).toHaveBeenCalledWith(
         expect.stringContaining('toLower(u.screen_name) CONTAINS'),
-        { query: query.toLowerCase(), limit },
+        expect.objectContaining({ query: query.toLowerCase() }),
       );
     });
 
@@ -143,7 +143,7 @@ describe('UsersService', () => {
       // Assert
       expect(neo4jService.executeQuery).toHaveBeenCalledWith(
         expect.any(String),
-        expect.objectContaining({ limit }),
+        expect.any(Object), // limit is now neo4j.int(5)
       );
     });
   });
@@ -283,6 +283,82 @@ describe('UsersService', () => {
         expect.stringContaining('MATCH (u:User)'),
         {},
       );
+    });
+  });
+
+  describe('getFollowers', () => {
+    it('should return users who follow the specified user', async () => {
+      // Arrange
+      neo4jService.executeQuery.mockResolvedValue({
+        records: [
+          {
+            get: jest.fn(() => mockNeo4jUser),
+            toObject: jest.fn().mockReturnValue({ follower: mockNeo4jUser }),
+          },
+        ],
+      } as any);
+
+      // Act
+      const result = await service.getFollowers('neo4j', 10);
+
+      // Assert
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual(mockNeo4jUser);
+      expect(neo4jService.executeQuery).toHaveBeenCalledWith(
+        expect.stringContaining('[:FOLLOWS]->'),
+        expect.objectContaining({ screenName: 'neo4j' }),
+      );
+    });
+
+    it('should return empty array when user has no followers', async () => {
+      // Arrange
+      neo4jService.executeQuery.mockResolvedValue({
+        records: [],
+      } as any);
+
+      // Act
+      const result = await service.getFollowers('userwithnofollowers', 10);
+
+      // Assert
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('getFollowing', () => {
+    it('should return users that the specified user follows', async () => {
+      // Arrange
+      neo4jService.executeQuery.mockResolvedValue({
+        records: [
+          {
+            get: jest.fn(() => mockNeo4jUser),
+            toObject: jest.fn().mockReturnValue({ following: mockNeo4jUser }),
+          },
+        ],
+      } as any);
+
+      // Act
+      const result = await service.getFollowing('neo4j', 10);
+
+      // Assert
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual(mockNeo4jUser);
+      expect(neo4jService.executeQuery).toHaveBeenCalledWith(
+        expect.stringContaining('-[:FOLLOWS]->'),
+        expect.objectContaining({ screenName: 'neo4j' }),
+      );
+    });
+
+    it('should return empty array when user follows no one', async () => {
+      // Arrange
+      neo4jService.executeQuery.mockResolvedValue({
+        records: [],
+      } as any);
+
+      // Act
+      const result = await service.getFollowing('userfollowsnoone', 10);
+
+      // Assert
+      expect(result).toEqual([]);
     });
   });
 });

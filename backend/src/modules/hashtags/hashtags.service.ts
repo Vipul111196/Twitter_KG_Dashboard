@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import neo4j from 'neo4j-driver';
 import { Neo4jService } from '../../database/neo4j.service';
 import { HashtagStats } from './hashtags.types';
 import { Hashtag } from '../tweets/tweets.types';
@@ -32,7 +33,7 @@ export class HashtagsService {
       LIMIT $limit
     `;
 
-    const result = await this.neo4jService.executeQuery(query, { limit });
+    const result = await this.neo4jService.executeQuery(query, { limit: neo4j.int(limit) });
 
     return result.records.map((record) => ({
       name: record.get('name'),
