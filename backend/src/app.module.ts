@@ -7,6 +7,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { Neo4jModule } from './database/neo4j.module';
 import { UsersModule } from './modules/users/users.module';
+import { TweetsModule } from './modules/tweets/tweets.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -31,6 +32,7 @@ import configuration from './config/configuration';
     
     // Feature modules
     UsersModule,
+    TweetsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
