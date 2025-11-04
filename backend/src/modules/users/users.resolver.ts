@@ -68,6 +68,23 @@ export class UsersResolver {
   }
 
   /**
+   * Get top users by number of tweets
+   */
+  @Query(() => [User], {
+    description: 'Get top users by number of tweets posted',
+  })
+  async topUsersByTweets(
+    @Args('limit', {
+      type: () => Int,
+      defaultValue: 5,
+      description: 'Number of top users to return',
+    })
+    limit: number = 5,
+  ): Promise<User[]> {
+    return this.usersService.getTopUsersByTweets(limit);
+  }
+
+  /**
    * Get users with minimum follower count
    */
   @Query(() => [User], {

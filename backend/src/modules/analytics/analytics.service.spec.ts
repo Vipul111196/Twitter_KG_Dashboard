@@ -59,7 +59,7 @@ describe('AnalyticsService', () => {
   });
 
   describe('getNetworkData', () => {
-    it('should return network nodes and edges', async () => {
+    it('should return network nodes and edges with normalized sizes', async () => {
       const mockUser1 = {
         properties: {
           screen_name: 'neo4j',
@@ -93,12 +93,21 @@ describe('AnalyticsService', () => {
 
       expect(result.nodes).toHaveLength(2);
       expect(result.edges).toHaveLength(1);
-      expect(result.nodes[0]).toEqual({
-        id: 'neo4j',
-        label: 'Neo4j',
-        type: 'user',
-        size: 34507,
-      });
+      
+      // Sizes should be normalized to 20-60 range
+      expect(result.nodes[0].id).toBe('neo4j');
+      expect(result.nodes[0].label).toBe('Neo4j');
+      expect(result.nodes[0].type).toBe('user');
+      expect(result.nodes[0].size).toBeGreaterThanOrEqual(20);
+      expect(result.nodes[0].size).toBeLessThanOrEqual(60);
+      
+      expect(result.nodes[1].id).toBe('graphconnect');
+      expect(result.nodes[1].size).toBeGreaterThanOrEqual(20);
+      expect(result.nodes[1].size).toBeLessThanOrEqual(60);
+      
+      // Higher follower count should have larger size
+      expect(result.nodes[0].size).toBeGreaterThan(result.nodes[1].size);
+      
       expect(result.edges[0]).toEqual({
         source: 'neo4j',
         target: 'graphconnect',

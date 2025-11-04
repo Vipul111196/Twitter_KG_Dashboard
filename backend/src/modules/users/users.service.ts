@@ -71,6 +71,30 @@ export class UsersService {
   }
 
   /**
+   * Get top users by number of tweets
+   *
+   * @param limit - Maximum results to return
+   * @returns Array of users sorted by tweet count
+   */
+  async getTopUsersByTweets(limit: number = 10): Promise<User[]> {
+    const query = `
+      MATCH (u:User)-[:POSTS]->(t:Tweet)
+      WITH u, count(t) as tweetCount
+      RETURN u, tweetCount
+      ORDER BY tweetCount DESC
+      LIMIT $limit
+    `;
+
+    const result = await this.neo4jService.executeQuery(query, {
+      limit: neo4j.int(limit),
+    });
+
+    return result.records.map((record) =>
+      this.mapNodeToUser(record.get('u')),
+    );
+  }
+
+  /**
    * Get users with minimum follower count
    *
    * @param minFollowers - Minimum number of followers
@@ -90,8 +114,8 @@ export class UsersService {
     `;
 
     const result = await this.neo4jService.executeQuery(query, {
-      minFollowers,
-      limit,
+      minFollowers: neo4j.int(minFollowers),
+      limit: neo4j.int(limit),
     });
 
     return result.records.map((record) =>
@@ -114,7 +138,9 @@ export class UsersService {
       LIMIT $limit
     `;
 
-    const result = await this.neo4jService.executeQuery(query, { limit });
+    const result = await this.neo4jService.executeQuery(query, { 
+      limit: neo4j.int(limit) 
+    });
 
     return result.records.map((record) =>
       this.mapNodeToUser(record.get('u')),

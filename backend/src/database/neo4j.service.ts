@@ -54,7 +54,7 @@ export class Neo4jService implements OnModuleInit, OnModuleDestroy {
    * const result = await neo4jService.executeQuery(
    *   'MATCH (u:User {screen_name: $screenName}) RETURN u',
    *   { screenName: 'neo4j' }
-   * );
+   * );  
    */
   async executeQuery(
     query: string,

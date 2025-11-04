@@ -1,65 +1,141 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useQuery } from '@apollo/client/react';
+import { Users, MessageSquare, Hash, Network } from 'lucide-react';
+import { DashboardLayout } from '@/components/dashboard/dashboard-layout';
+import { StatsCard } from '@/components/dashboard/stats-card';
+import { GET_DASHBOARD_STATS, GET_TRENDING_HASHTAGS, GET_TOP_USERS_BY_TWEETS } from '@/lib/graphql/queries';
+import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+
+/**
+ * Dashboard Home Page
+ * 
+ * Displays overview with key statistics, trending hashtags, and top users by tweets.
+ * Fetches real data from Neo4j via GraphQL backend.
+ */
+
+export default function DashboardPage() {
+  const { data: statsData, loading: statsLoading } = useQuery(GET_DASHBOARD_STATS);
+  const { data: hashtagsData, loading: hashtagsLoading } = useQuery(GET_TRENDING_HASHTAGS, {
+    variables: { limit: 5 },
+  });
+  const { data: topUsersData, loading: topUsersLoading } = useQuery(GET_TOP_USERS_BY_TWEETS, {
+    variables: { limit: 5 },
+  });
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <DashboardLayout>
+      <div className="space-y-8">
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard Overview</h1>
+          <p className="text-muted-foreground mt-2">
+            Twitter network analytics powered by Neo4j
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Stats Grid */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {statsLoading ? (
+            <>
+              {[...Array(4)].map((_, i) => (
+                <Card key={i} className="p-6">
+                  <Skeleton className="h-20" />
+                </Card>
+              ))}
+            </>
+          ) : (
+            <>
+              <StatsCard
+                title="Total Users"
+                value={statsData?.dashboardStats?.totalUsers || 0}
+                icon={Users}
+                description="Registered accounts"
+              />
+              <StatsCard
+                title="Total Tweets"
+                value={statsData?.dashboardStats?.totalTweets || 0}
+                icon={MessageSquare}
+                description="Published tweets"
+              />
+              <StatsCard
+                title="Hashtags"
+                value={statsData?.dashboardStats?.totalHashtags || 0}
+                icon={Hash}
+                description="Unique hashtags"
+              />
+              <StatsCard
+                title="Relationships"
+                value={statsData?.dashboardStats?.totalRelationships || 0}
+                icon={Network}
+                description="Network connections"
+              />
+            </>
+          )}
         </div>
-      </main>
-    </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Trending Hashtags */}
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Trending Hashtags</h2>
+            {hashtagsLoading ? (
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-8" />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {hashtagsData?.trendingHashtags?.map((hashtag: any, index: number) => (
+                  <div key={hashtag.name} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-muted-foreground">
+                        #{index + 1}
+                      </span>
+                      <span className="font-medium">#{hashtag.name}</span>
+                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      {hashtag.usageCount.toLocaleString()} tweets
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+
+          {/* Top Users by Tweets */}
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Top Users by Tweets</h2>
+            {topUsersLoading ? (
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-12" />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {topUsersData?.topUsersByTweets?.map((user: any, index: number) => (
+                  <div key={user.screen_name} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium text-muted-foreground w-6">
+                        #{index + 1}
+                      </span>
+                      <div>
+                        <div className="font-medium">@{user.screen_name}</div>
+                        <div className="text-sm text-muted-foreground">{user.name}</div>
+                      </div>
+                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      {user.followers.toLocaleString()} followers
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        </div>
+      </div>
+    </DashboardLayout>
   );
 }

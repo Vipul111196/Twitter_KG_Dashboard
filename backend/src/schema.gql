@@ -94,7 +94,7 @@ type Query {
   hashtag(name: String!): Hashtag
 
   """Get network data for visualization"""
-  networkData(limit: Int! = 100): NetworkData!
+  networkData(limit: Int! = 100, minFollowers: Int! = 0, minHashtagUsage: Int! = 5): NetworkData!
 
   """Get most recent tweets"""
   recentTweets(
@@ -124,6 +124,12 @@ type Query {
   topUsers(
     """Number of top users to return"""
     limit: Int! = 10
+  ): [User!]!
+
+  """Get top users by number of tweets posted"""
+  topUsersByTweets(
+    """Number of top users to return"""
+    limit: Int! = 5
   ): [User!]!
 
   """Get total number of hashtags"""
