@@ -1,15 +1,15 @@
-import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client';
+import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
 
 /**
  * Apollo Client Configuration
- * 
+ *
  * Connects to the NestJS GraphQL backend.
  * Uses InMemoryCache for efficient query caching.
  */
 
 const httpLink = new HttpLink({
-  uri: process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:3001/graphql',
-  credentials: 'include',
+  uri: process.env.NEXT_PUBLIC_GRAPHQL_URL || "http://localhost:3001/graphql",
+  credentials: "include",
 });
 
 export const apolloClient = new ApolloClient({
@@ -34,8 +34,7 @@ export const apolloClient = new ApolloClient({
   }),
   defaultOptions: {
     watchQuery: {
-      fetchPolicy: 'cache-and-network',
+      fetchPolicy: "cache-and-network",
     },
   },
 });
-

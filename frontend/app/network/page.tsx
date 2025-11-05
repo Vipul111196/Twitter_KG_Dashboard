@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useQuery } from '@apollo/client/react';
-import { Network as NetworkIcon, Loader2, Filter } from 'lucide-react';
-import { DashboardLayout } from '@/components/dashboard/dashboard-layout';
-import { NetworkGraph } from '@/components/graph/network-graph';
-import { UserDetailModal } from '@/components/modals/user-detail-modal';
-import { TweetDetailModal } from '@/components/modals/tweet-detail-modal';
-import { HashtagDetailModal } from '@/components/modals/hashtag-detail-modal';
-import { Card } from '@/components/ui/card';
-import { Slider } from '@/components/ui/slider';
-import { GET_NETWORK_DATA } from '@/lib/graphql/queries';
-import type { NetworkDataResponse } from '@/lib/types';
+import { useState } from "react";
+import { useQuery } from "@apollo/client/react";
+import { Network as NetworkIcon, Loader2, Filter } from "lucide-react";
+import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
+import { NetworkGraph } from "@/components/graph/network-graph";
+import { UserDetailModal } from "@/components/modals/user-detail-modal";
+import { TweetDetailModal } from "@/components/modals/tweet-detail-modal";
+import { HashtagDetailModal } from "@/components/modals/hashtag-detail-modal";
+import { Card } from "@/components/ui/card";
+import { Slider } from "@/components/ui/slider";
+import { GET_NETWORK_DATA } from "@/lib/graphql/queries";
+import type { NetworkDataResponse } from "@/lib/types";
 
 /**
  * Network Visualization Page
- * 
+ *
  * Interactive graph visualization of Twitter network data.
  * Shows users, tweets, and hashtags with their relationships.
  */
@@ -29,14 +29,17 @@ export default function NetworkPage() {
   const [selectedTweet, setSelectedTweet] = useState<string | null>(null);
   const [selectedHashtag, setSelectedHashtag] = useState<string | null>(null);
 
-  const { data, loading, error } = useQuery<NetworkDataResponse>(GET_NETWORK_DATA, {
-    variables: { 
-      limit: nodeLimit,
-      minFollowers: minFollowers,
-      minHashtagUsage: minHashtagUsage,
-      minTweets: minTweets,
+  const { data, loading, error } = useQuery<NetworkDataResponse>(
+    GET_NETWORK_DATA,
+    {
+      variables: {
+        limit: nodeLimit,
+        minFollowers: minFollowers,
+        minHashtagUsage: minHashtagUsage,
+        minTweets: minTweets,
+      },
     },
-  });
+  );
 
   const handleNodeClick = (nodeId: string, nodeType: string) => {
     // Reset all selections
@@ -46,13 +49,13 @@ export default function NetworkPage() {
 
     // Set appropriate selection based on node type (lowercase from backend)
     const normalizedType = nodeType.toLowerCase();
-    if (normalizedType === 'user') {
+    if (normalizedType === "user") {
       setSelectedUser(nodeId);
-    } else if (normalizedType === 'tweet') {
+    } else if (normalizedType === "tweet") {
       setSelectedTweet(nodeId);
-    } else if (normalizedType === 'hashtag') {
+    } else if (normalizedType === "hashtag") {
       // Remove '#' prefix if present
-      const hashtagName = nodeId.startsWith('#') ? nodeId.slice(1) : nodeId;
+      const hashtagName = nodeId.startsWith("#") ? nodeId.slice(1) : nodeId;
       setSelectedHashtag(hashtagName);
     }
   };
@@ -77,7 +80,7 @@ export default function NetworkPage() {
             <Filter className="h-5 w-5 text-primary" />
             <h3 className="font-semibold">Controls & Filters</h3>
           </div>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Node Limit */}
             <div>
@@ -184,7 +187,9 @@ export default function NetworkPage() {
           ) : error ? (
             <div className="flex items-center justify-center h-[600px]">
               <div className="text-center space-y-2">
-                <p className="text-destructive font-semibold">Error loading network</p>
+                <p className="text-destructive font-semibold">
+                  Error loading network
+                </p>
                 <p className="text-sm text-muted-foreground">{error.message}</p>
               </div>
             </div>
@@ -205,13 +210,17 @@ export default function NetworkPage() {
         {data?.networkData && (
           <div className="grid gap-4 md:grid-cols-2">
             <Card className="p-6">
-              <h3 className="text-sm font-medium text-muted-foreground">Total Nodes</h3>
+              <h3 className="text-sm font-medium text-muted-foreground">
+                Total Nodes
+              </h3>
               <p className="text-3xl font-bold mt-2">
                 {data.networkData.nodes?.length || 0}
               </p>
             </Card>
             <Card className="p-6">
-              <h3 className="text-sm font-medium text-muted-foreground">Total Relationships</h3>
+              <h3 className="text-sm font-medium text-muted-foreground">
+                Total Relationships
+              </h3>
               <p className="text-3xl font-bold mt-2">
                 {data.networkData.edges?.length || 0}
               </p>
@@ -237,4 +246,3 @@ export default function NetworkPage() {
     </DashboardLayout>
   );
 }
-

@@ -1,43 +1,55 @@
-'use client';
+"use client";
 
-import { useState, useMemo } from 'react';
-import { useQuery } from '@apollo/client/react';
-import { Hash, TrendingUp, Search } from 'lucide-react';
-import { DashboardLayout } from '@/components/dashboard/dashboard-layout';
-import { Card } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Input } from '@/components/ui/input';
-import { GET_TRENDING_HASHTAGS, GET_TWEETS_BY_HASHTAG } from '@/lib/graphql/queries';
-import type { TrendingHashtagsResponse, TweetsByHashtagResponse, Hashtag } from '@/lib/types';
+import { useState, useMemo } from "react";
+import { useQuery } from "@apollo/client/react";
+import { Hash, TrendingUp, Search } from "lucide-react";
+import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import {
+  GET_TRENDING_HASHTAGS,
+  GET_TWEETS_BY_HASHTAG,
+} from "@/lib/graphql/queries";
+import type {
+  TrendingHashtagsResponse,
+  TweetsByHashtagResponse,
+  Hashtag,
+} from "@/lib/types";
 
 /**
  * Hashtags Page
- * 
+ *
  * View trending hashtags and explore related tweets.
  * Shows hashtag usage statistics and recent tweets.
  */
 
 export default function HashtagsPage() {
   const [selectedHashtag, setSelectedHashtag] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: hashtagsData, loading: hashtagsLoading } = useQuery<TrendingHashtagsResponse>(GET_TRENDING_HASHTAGS, {
-    variables: { limit: 50 },
-  });
+  const { data: hashtagsData, loading: hashtagsLoading } =
+    useQuery<TrendingHashtagsResponse>(GET_TRENDING_HASHTAGS, {
+      variables: { limit: 50 },
+    });
 
   // Filter hashtags based on search query
   const filteredHashtags = useMemo(() => {
     if (!hashtagsData?.trendingHashtags) return [];
     if (!searchQuery.trim()) return hashtagsData.trendingHashtags;
-    
-    const query = searchQuery.toLowerCase().replace(/^#/, ''); // Remove # if user typed it
+
+    const query = searchQuery.toLowerCase().replace(/^#/, ""); // Remove # if user typed it
     return hashtagsData.trendingHashtags.filter((hashtag: Hashtag) =>
-      hashtag.name.toLowerCase().includes(query)
+      hashtag.name.toLowerCase().includes(query),
     );
   }, [hashtagsData, searchQuery]);
 
-  const { data: tweetsData, loading: tweetsLoading, error: tweetsError } = useQuery<TweetsByHashtagResponse>(GET_TWEETS_BY_HASHTAG, {
-    variables: { hashtagName: selectedHashtag || '', limit: 10 },
+  const {
+    data: tweetsData,
+    loading: tweetsLoading,
+    error: tweetsError,
+  } = useQuery<TweetsByHashtagResponse>(GET_TWEETS_BY_HASHTAG, {
+    variables: { hashtagName: selectedHashtag || "", limit: 10 },
     skip: !selectedHashtag,
   });
 
@@ -93,8 +105,8 @@ export default function HashtagsPage() {
                     onClick={() => setSelectedHashtag(hashtag.name)}
                     className={`w-full text-left p-4 rounded-lg border transition-all ${
                       selectedHashtag === hashtag.name
-                        ? 'bg-primary text-primary-foreground border-primary'
-                        : 'hover:bg-accent border-transparent'
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "hover:bg-accent border-transparent"
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -122,7 +134,9 @@ export default function HashtagsPage() {
           {/* Related Tweets */}
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4">
-              {selectedHashtag ? `Tweets with #${selectedHashtag}` : 'Select a hashtag'}
+              {selectedHashtag
+                ? `Tweets with #${selectedHashtag}`
+                : "Select a hashtag"}
             </h2>
 
             {!selectedHashtag ? (
@@ -139,19 +153,24 @@ export default function HashtagsPage() {
               <div className="flex items-center justify-center h-64 text-red-500">
                 <p>Error loading tweets: {tweetsError.message}</p>
               </div>
-            ) : !tweetsData?.tweetsByHashtag || tweetsData.tweetsByHashtag.length === 0 ? (
+            ) : !tweetsData?.tweetsByHashtag ||
+              tweetsData.tweetsByHashtag.length === 0 ? (
               <div className="flex items-center justify-center h-64 text-muted-foreground">
                 <p>No tweets found for this hashtag</p>
               </div>
             ) : (
               <div className="space-y-4 max-h-[600px] overflow-y-auto">
                 {tweetsData.tweetsByHashtag.map((tweet) => (
-                  <div key={tweet.id} className="p-4 border rounded-lg hover:bg-accent transition-colors">
+                  <div
+                    key={tweet.id}
+                    className="p-4 border rounded-lg hover:bg-accent transition-colors"
+                  >
                     <p className="text-sm">{tweet.text}</p>
                     <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
-                      {tweet.favorites !== null && tweet.favorites !== undefined && (
-                        <span>❤️ {tweet.favorites}</span>
-                      )}
+                      {tweet.favorites !== null &&
+                        tweet.favorites !== undefined && (
+                          <span>❤️ {tweet.favorites}</span>
+                        )}
                       {tweet.created_at && (
                         <span>
                           {new Date(tweet.created_at).toLocaleDateString()}
@@ -168,4 +187,3 @@ export default function HashtagsPage() {
     </DashboardLayout>
   );
 }
-

@@ -1,16 +1,35 @@
-'use client';
+"use client";
 
-import { useQuery } from '@apollo/client/react';
-import { User as UserIcon, Calendar, MapPin, Link as LinkIcon } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { GET_USER_BY_SCREEN_NAME, GET_USER_TWEETS, GET_USER_STATS } from '@/lib/graphql/queries';
-import type { UserResponse, TweetsByUserResponse, UserStatsResponse } from '@/lib/types';
+import { useQuery } from "@apollo/client/react";
+import {
+  User as UserIcon,
+  Calendar,
+  MapPin,
+  Link as LinkIcon,
+} from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  GET_USER_BY_SCREEN_NAME,
+  GET_USER_TWEETS,
+  GET_USER_STATS,
+} from "@/lib/graphql/queries";
+import type {
+  UserResponse,
+  TweetsByUserResponse,
+  UserStatsResponse,
+} from "@/lib/types";
 
 /**
  * User Detail Modal Component
- * 
+ *
  * Shows comprehensive user information when a node is clicked:
  * - Profile details (username, followers, location, etc.)
  * - User's tweets
@@ -24,18 +43,33 @@ interface UserDetailModalProps {
   onClose: () => void;
 }
 
-export function UserDetailModal({ screenName, open, onClose }: UserDetailModalProps) {
-  const { data: userData, loading: userLoading } = useQuery<UserResponse>(GET_USER_BY_SCREEN_NAME, {
-    variables: { screenName },
-    skip: !screenName,
-  });
+export function UserDetailModal({
+  screenName,
+  open,
+  onClose,
+}: UserDetailModalProps) {
+  const { data: userData, loading: userLoading } = useQuery<UserResponse>(
+    GET_USER_BY_SCREEN_NAME,
+    {
+      variables: { screenName },
+      skip: !screenName,
+    },
+  );
 
-  const { data: tweetsData, loading: tweetsLoading, error: tweetsError } = useQuery<TweetsByUserResponse>(GET_USER_TWEETS, {
+  const {
+    data: tweetsData,
+    loading: tweetsLoading,
+    error: tweetsError,
+  } = useQuery<TweetsByUserResponse>(GET_USER_TWEETS, {
     variables: { screenName, limit: 10 },
     skip: !screenName,
   });
 
-  const { data: statsData, loading: statsLoading, error: statsError } = useQuery<UserStatsResponse>(GET_USER_STATS, {
+  const {
+    data: statsData,
+    loading: statsLoading,
+    error: statsError,
+  } = useQuery<UserStatsResponse>(GET_USER_STATS, {
     variables: { screenName },
     skip: !screenName,
   });
@@ -75,16 +109,24 @@ export function UserDetailModal({ screenName, open, onClose }: UserDetailModalPr
               <div className="flex-1">
                 <h2 className="text-2xl font-bold">{user.name}</h2>
                 <p className="text-muted-foreground">@{user.screen_name}</p>
-                
+
                 {/* Stats */}
                 <div className="flex gap-6 mt-3">
                   <div>
-                    <span className="font-bold text-lg">{user.followers?.toLocaleString()}</span>
-                    <span className="text-sm text-muted-foreground ml-1">Followers</span>
+                    <span className="font-bold text-lg">
+                      {user.followers?.toLocaleString()}
+                    </span>
+                    <span className="text-sm text-muted-foreground ml-1">
+                      Followers
+                    </span>
                   </div>
                   <div>
-                    <span className="font-bold text-lg">{user.following?.toLocaleString()}</span>
-                    <span className="text-sm text-muted-foreground ml-1">Following</span>
+                    <span className="font-bold text-lg">
+                      {user.following?.toLocaleString()}
+                    </span>
+                    <span className="text-sm text-muted-foreground ml-1">
+                      Following
+                    </span>
                   </div>
                 </div>
 
@@ -99,13 +141,13 @@ export function UserDetailModal({ screenName, open, onClose }: UserDetailModalPr
                   {user.url && (
                     <div className="flex items-center gap-1">
                       <LinkIcon className="h-4 w-4" />
-                      <a 
-                        href={user.url} 
-                        target="_blank" 
+                      <a
+                        href={user.url}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="hover:text-primary underline"
                       >
-                        {user.url.replace(/^https?:\/\//, '')}
+                        {user.url.replace(/^https?:\/\//, "")}
                       </a>
                     </div>
                   )}
@@ -119,14 +161,14 @@ export function UserDetailModal({ screenName, open, onClose }: UserDetailModalPr
                 <TabsTrigger value="tweets">
                   Tweets ({userStats?.tweetCount || tweets.length})
                 </TabsTrigger>
-                <TabsTrigger value="stats">
-                  Stats
-                </TabsTrigger>
+                <TabsTrigger value="stats">Stats</TabsTrigger>
               </TabsList>
 
               <TabsContent value="tweets" className="space-y-3 mt-4">
                 {tweetsLoading ? (
-                  <p className="text-center text-muted-foreground py-8">Loading tweets...</p>
+                  <p className="text-center text-muted-foreground py-8">
+                    Loading tweets...
+                  </p>
                 ) : tweetsError ? (
                   <div className="text-center text-destructive py-8">
                     <p>Error loading tweets</p>
@@ -135,29 +177,45 @@ export function UserDetailModal({ screenName, open, onClose }: UserDetailModalPr
                 ) : tweets.length === 0 ? (
                   <div className="text-center text-muted-foreground py-8">
                     <p>No tweets found for @{screenName}</p>
-                    <p className="text-xs mt-2">This user may have no tweets in the dataset</p>
+                    <p className="text-xs mt-2">
+                      This user may have no tweets in the dataset
+                    </p>
                   </div>
                 ) : (
-                  tweets.map((tweet: { id: string; text: string; created_at?: string; favorites?: number }) => (
-                    <Card key={tweet.id} className="p-4">
-                      <p className="text-sm">{tweet.text}</p>
-                      {tweet.created_at && (
-                        <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                          <Calendar className="h-3 w-3" />
-                          <span>{new Date(tweet.created_at).toLocaleDateString()}</span>
-                          {tweet.favorites !== undefined && tweet.favorites > 0 && (
-                            <span className="ml-auto">❤️ {tweet.favorites}</span>
-                          )}
-                        </div>
-                      )}
-                    </Card>
-                  ))
+                  tweets.map(
+                    (tweet: {
+                      id: string;
+                      text: string;
+                      created_at?: string;
+                      favorites?: number;
+                    }) => (
+                      <Card key={tweet.id} className="p-4">
+                        <p className="text-sm">{tweet.text}</p>
+                        {tweet.created_at && (
+                          <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                            <Calendar className="h-3 w-3" />
+                            <span>
+                              {new Date(tweet.created_at).toLocaleDateString()}
+                            </span>
+                            {tweet.favorites !== undefined &&
+                              tweet.favorites > 0 && (
+                                <span className="ml-auto">
+                                  ❤️ {tweet.favorites}
+                                </span>
+                              )}
+                          </div>
+                        )}
+                      </Card>
+                    ),
+                  )
                 )}
               </TabsContent>
 
               <TabsContent value="stats" className="mt-4">
                 {statsLoading ? (
-                  <p className="text-center text-muted-foreground py-8">Loading stats...</p>
+                  <p className="text-center text-muted-foreground py-8">
+                    Loading stats...
+                  </p>
                 ) : statsError ? (
                   <div className="text-center text-destructive py-8">
                     <p>Error loading stats</p>
@@ -170,20 +228,36 @@ export function UserDetailModal({ screenName, open, onClose }: UserDetailModalPr
                 ) : (
                   <div className="grid grid-cols-2 gap-4">
                     <Card className="p-4">
-                      <div className="text-sm text-muted-foreground">Total Tweets</div>
-                      <div className="text-2xl font-bold mt-1">{userStats.tweetCount?.toLocaleString()}</div>
+                      <div className="text-sm text-muted-foreground">
+                        Total Tweets
+                      </div>
+                      <div className="text-2xl font-bold mt-1">
+                        {userStats.tweetCount?.toLocaleString()}
+                      </div>
                     </Card>
                     <Card className="p-4">
-                      <div className="text-sm text-muted-foreground">Followers</div>
-                      <div className="text-2xl font-bold mt-1">{userStats.followerCount?.toLocaleString()}</div>
+                      <div className="text-sm text-muted-foreground">
+                        Followers
+                      </div>
+                      <div className="text-2xl font-bold mt-1">
+                        {userStats.followerCount?.toLocaleString()}
+                      </div>
                     </Card>
                     <Card className="p-4">
-                      <div className="text-sm text-muted-foreground">Following</div>
-                      <div className="text-2xl font-bold mt-1">{userStats.followingCount?.toLocaleString()}</div>
+                      <div className="text-sm text-muted-foreground">
+                        Following
+                      </div>
+                      <div className="text-2xl font-bold mt-1">
+                        {userStats.followingCount?.toLocaleString()}
+                      </div>
                     </Card>
                     <Card className="p-4">
-                      <div className="text-sm text-muted-foreground">Unique Hashtags</div>
-                      <div className="text-2xl font-bold mt-1">{userStats.uniqueHashtagsUsed?.toLocaleString()}</div>
+                      <div className="text-sm text-muted-foreground">
+                        Unique Hashtags
+                      </div>
+                      <div className="text-2xl font-bold mt-1">
+                        {userStats.uniqueHashtagsUsed?.toLocaleString()}
+                      </div>
                     </Card>
                   </div>
                 )}
@@ -195,4 +269,3 @@ export function UserDetailModal({ screenName, open, onClose }: UserDetailModalPr
     </Dialog>
   );
 }
-

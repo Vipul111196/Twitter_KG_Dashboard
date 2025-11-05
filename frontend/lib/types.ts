@@ -31,7 +31,7 @@ export interface Hashtag {
 export interface NetworkNode {
   id: string;
   label: string;
-  type: 'user' | 'tweet' | 'hashtag';
+  type: "user" | "tweet" | "hashtag";
   size?: number;
 }
 
@@ -115,4 +115,3 @@ export interface UserStatsResponse {
 export interface NetworkDataResponse {
   networkData: NetworkData;
 }
-

@@ -42,7 +42,11 @@ describe('GraphQL API Integration Tests (e2e)', () => {
   });
 
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
+    // Give time for connections to fully close
+    await new Promise((resolve) => setTimeout(resolve, 500));
   });
 
   /**

@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { Sidebar } from './sidebar';
+import { Sidebar } from "./sidebar";
 
 /**
  * Dashboard Layout Component
- * 
+ *
  * Provides consistent layout with sidebar navigation.
  * Main content area has proper spacing and responsive design.
  */
@@ -14,11 +14,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen">
       <Sidebar />
       <main className="flex-1 ml-64">
-        <div className="container mx-auto p-6 max-w-7xl">
-          {children}
-        </div>
+        <div className="container mx-auto p-6 max-w-7xl">{children}</div>
       </main>
     </div>
   );
 }
-

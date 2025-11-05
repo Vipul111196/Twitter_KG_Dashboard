@@ -21,9 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
-        <ApolloProvider>
-          {children}
-        </ApolloProvider>
+        <ApolloProvider>{children}</ApolloProvider>
       </body>
     </html>
   );

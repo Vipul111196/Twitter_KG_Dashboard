@@ -1,10 +1,16 @@
-'use client';
+"use client";
 
-import { useQuery } from '@apollo/client/react';
-import { Hash, TrendingUp } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Skeleton } from '@/components/ui/skeleton';
-import { gql } from '@apollo/client';
+import { useQuery } from "@apollo/client/react";
+import { Hash, TrendingUp } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import { gql } from "@apollo/client";
 // Types are inferred from GraphQL response
 
 const GET_HASHTAG_DETAILS = gql`
@@ -28,14 +34,22 @@ interface HashtagDetailModalProps {
 
 /**
  * Hashtag Detail Modal
- * 
+ *
  * Shows detailed information about a hashtag when clicked in network graph.
  * Displays hashtag info and recent tweets using this hashtag.
  */
-export function HashtagDetailModal({ hashtagName, onClose }: HashtagDetailModalProps) {
+export function HashtagDetailModal({
+  hashtagName,
+  onClose,
+}: HashtagDetailModalProps) {
   const { data, loading } = useQuery<{
     hashtag: { name: string };
-    tweetsByHashtag: Array<{ id: string; text: string; created_at?: string; favorites?: number }>;
+    tweetsByHashtag: Array<{
+      id: string;
+      text: string;
+      created_at?: string;
+      favorites?: number;
+    }>;
   }>(GET_HASHTAG_DETAILS, {
     variables: { name: hashtagName },
     skip: !hashtagName,
@@ -93,22 +107,34 @@ export function HashtagDetailModal({ hashtagName, onClose }: HashtagDetailModalP
                 </p>
               ) : (
                 <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                  {tweets.map((tweet: { id: string; text: string; created_at?: string; favorites?: number }) => (
-                    <div
-                      key={tweet.id}
-                      className="border rounded-lg p-4 hover:bg-accent/50 transition-colors"
-                    >
-                      <p className="text-sm leading-relaxed mb-2">{tweet.text}</p>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                        {tweet.favorites !== null && tweet.favorites !== undefined && (
-                          <span>❤️ {tweet.favorites.toLocaleString()}</span>
-                        )}
-                        {tweet.created_at && (
-                          <span>{new Date(tweet.created_at).toLocaleDateString()}</span>
-                        )}
+                  {tweets.map(
+                    (tweet: {
+                      id: string;
+                      text: string;
+                      created_at?: string;
+                      favorites?: number;
+                    }) => (
+                      <div
+                        key={tweet.id}
+                        className="border rounded-lg p-4 hover:bg-accent/50 transition-colors"
+                      >
+                        <p className="text-sm leading-relaxed mb-2">
+                          {tweet.text}
+                        </p>
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                          {tweet.favorites !== null &&
+                            tweet.favorites !== undefined && (
+                              <span>❤️ {tweet.favorites.toLocaleString()}</span>
+                            )}
+                          {tweet.created_at && (
+                            <span>
+                              {new Date(tweet.created_at).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
               )}
             </div>
@@ -118,4 +144,3 @@ export function HashtagDetailModal({ hashtagName, onClose }: HashtagDetailModalP
     </Dialog>
   );
 }
-

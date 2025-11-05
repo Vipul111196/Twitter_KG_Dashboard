@@ -1,35 +1,54 @@
-'use client';
+"use client";
 
-import { useQuery } from '@apollo/client/react';
-import { BarChart3, TrendingUp, Users, MessageSquare } from 'lucide-react';
-import { DashboardLayout } from '@/components/dashboard/dashboard-layout';
-import { StatsCard } from '@/components/dashboard/stats-card';
-import { Card } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { GET_DASHBOARD_STATS, GET_TRENDING_HASHTAGS } from '@/lib/graphql/queries';
-import type { DashboardStatsResponse, TrendingHashtagsResponse, Hashtag } from '@/lib/types';
+import { useQuery } from "@apollo/client/react";
+import { BarChart3, TrendingUp, Users, MessageSquare } from "lucide-react";
+import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
+import { StatsCard } from "@/components/dashboard/stats-card";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  GET_DASHBOARD_STATS,
+  GET_TRENDING_HASHTAGS,
+} from "@/lib/graphql/queries";
+import type {
+  DashboardStatsResponse,
+  TrendingHashtagsResponse,
+  Hashtag,
+} from "@/lib/types";
 
 /**
  * Analytics Page
- * 
+ *
  * Advanced analytics and insights about the Twitter network.
  * Shows detailed statistics and trends.
  */
 
 export default function AnalyticsPage() {
-  const { data: statsData, loading: statsLoading } = useQuery<DashboardStatsResponse>(GET_DASHBOARD_STATS);
-  const { data: hashtagsData, loading: hashtagsLoading } = useQuery<TrendingHashtagsResponse>(GET_TRENDING_HASHTAGS, {
-    variables: { limit: 10 },
-  });
+  const { data: statsData, loading: statsLoading } =
+    useQuery<DashboardStatsResponse>(GET_DASHBOARD_STATS);
+  const { data: hashtagsData, loading: hashtagsLoading } =
+    useQuery<TrendingHashtagsResponse>(GET_TRENDING_HASHTAGS, {
+      variables: { limit: 10 },
+    });
 
   // Calculate some derived metrics
-  const avgTweetsPerUser = statsData?.dashboardStats?.totalTweets && statsData?.dashboardStats?.totalUsers
-    ? (statsData.dashboardStats.totalTweets / statsData.dashboardStats.totalUsers).toFixed(2)
-    : 0;
+  const avgTweetsPerUser =
+    statsData?.dashboardStats?.totalTweets &&
+    statsData?.dashboardStats?.totalUsers
+      ? (
+          statsData.dashboardStats.totalTweets /
+          statsData.dashboardStats.totalUsers
+        ).toFixed(2)
+      : 0;
 
-  const avgHashtagsPerTweet = statsData?.dashboardStats?.totalHashtags && statsData?.dashboardStats?.totalTweets
-    ? (statsData.dashboardStats.totalHashtags / statsData.dashboardStats.totalTweets).toFixed(2)
-    : 0;
+  const avgHashtagsPerTweet =
+    statsData?.dashboardStats?.totalHashtags &&
+    statsData?.dashboardStats?.totalTweets
+      ? (
+          statsData.dashboardStats.totalHashtags /
+          statsData.dashboardStats.totalTweets
+        ).toFixed(2)
+      : 0;
 
   return (
     <DashboardLayout>
@@ -93,23 +112,34 @@ export default function AnalyticsPage() {
           ) : (
             <div className="grid gap-4 md:grid-cols-3">
               <div className="p-4 border rounded-lg">
-                <p className="text-sm text-muted-foreground">Total Relationships</p>
+                <p className="text-sm text-muted-foreground">
+                  Total Relationships
+                </p>
                 <p className="text-2xl font-bold mt-2">
-                  {statsData?.dashboardStats?.totalRelationships?.toLocaleString() || 0}
+                  {statsData?.dashboardStats?.totalRelationships?.toLocaleString() ||
+                    0}
                 </p>
               </div>
               <div className="p-4 border rounded-lg">
                 <p className="text-sm text-muted-foreground">Unique Hashtags</p>
                 <p className="text-2xl font-bold mt-2">
-                  {statsData?.dashboardStats?.totalHashtags?.toLocaleString() || 0}
+                  {statsData?.dashboardStats?.totalHashtags?.toLocaleString() ||
+                    0}
                 </p>
               </div>
               <div className="p-4 border rounded-lg">
                 <p className="text-sm text-muted-foreground">Network Density</p>
                 <p className="text-2xl font-bold mt-2">
-                  {statsData?.dashboardStats?.totalRelationships && statsData?.dashboardStats?.totalUsers
-                    ? ((statsData.dashboardStats.totalRelationships / (statsData.dashboardStats.totalUsers * (statsData.dashboardStats.totalUsers - 1))) * 100).toFixed(2)
-                    : 0}%
+                  {statsData?.dashboardStats?.totalRelationships &&
+                  statsData?.dashboardStats?.totalUsers
+                    ? (
+                        (statsData.dashboardStats.totalRelationships /
+                          (statsData.dashboardStats.totalUsers *
+                            (statsData.dashboardStats.totalUsers - 1))) *
+                        100
+                      ).toFixed(2)
+                    : 0}
+                  %
                 </p>
               </div>
             </div>
@@ -127,32 +157,36 @@ export default function AnalyticsPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {hashtagsData?.trendingHashtags?.map((hashtag: Hashtag, index: number) => {
-                const maxUsage = hashtagsData.trendingHashtags[0]?.usageCount ?? 1;
-                const percentage = ((hashtag.usageCount ?? 0) / maxUsage) * 100;
-                
-                return (
-                  <div key={hashtag.name}>
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-muted-foreground">
-                          #{index + 1}
+              {hashtagsData?.trendingHashtags?.map(
+                (hashtag: Hashtag, index: number) => {
+                  const maxUsage =
+                    hashtagsData.trendingHashtags[0]?.usageCount ?? 1;
+                  const percentage =
+                    ((hashtag.usageCount ?? 0) / maxUsage) * 100;
+
+                  return (
+                    <div key={hashtag.name}>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-muted-foreground">
+                            #{index + 1}
+                          </span>
+                          <span className="font-medium">#{hashtag.name}</span>
+                        </div>
+                        <span className="text-sm text-muted-foreground">
+                          {(hashtag.usageCount || 0).toLocaleString()} tweets
                         </span>
-                        <span className="font-medium">#{hashtag.name}</span>
                       </div>
-                      <span className="text-sm text-muted-foreground">
-                        {(hashtag.usageCount || 0).toLocaleString()} tweets
-                      </span>
+                      <div className="w-full bg-accent rounded-full h-2">
+                        <div
+                          className="bg-primary h-2 rounded-full transition-all"
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="w-full bg-accent rounded-full h-2">
-                      <div
-                        className="bg-primary h-2 rounded-full transition-all"
-                        style={{ width: `${percentage}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                },
+              )}
             </div>
           )}
         </Card>
@@ -160,4 +194,3 @@ export default function AnalyticsPage() {
     </DashboardLayout>
   );
 }
-

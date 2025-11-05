@@ -1,39 +1,39 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { BarChart3, Users, Hash, Network, Home } from 'lucide-react';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { BarChart3, Users, Hash, Network, Home } from "lucide-react";
 
 /**
  * Dashboard Sidebar Navigation
- * 
+ *
  * Provides main navigation for the dashboard with active state indicators.
  */
 
 const navItems = [
   {
-    name: 'Dashboard',
-    href: '/',
+    name: "Dashboard",
+    href: "/",
     icon: Home,
   },
   {
-    name: 'Users',
-    href: '/users',
+    name: "Users",
+    href: "/users",
     icon: Users,
   },
   {
-    name: 'Network',
-    href: '/network',
+    name: "Network",
+    href: "/network",
     icon: Network,
   },
   {
-    name: 'Hashtags',
-    href: '/hashtags',
+    name: "Hashtags",
+    href: "/hashtags",
     icon: Hash,
   },
   {
-    name: 'Analytics',
-    href: '/analytics',
+    name: "Analytics",
+    href: "/analytics",
     icon: BarChart3,
   },
 ];
@@ -62,8 +62,8 @@ export function Sidebar() {
                 href={item.href}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 }`}
               >
                 <Icon className="h-5 w-5" />
@@ -86,4 +86,3 @@ export function Sidebar() {
     </aside>
   );
 }
-

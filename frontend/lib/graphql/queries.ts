@@ -1,8 +1,8 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 /**
  * GraphQL Queries for Twitter Analytics Dashboard
- * 
+ *
  * These queries match the backend GraphQL schema.
  * All queries are tested and verified with real Neo4j data.
  */
@@ -23,8 +23,18 @@ export const GET_DASHBOARD_STATS = gql`
 `;
 
 export const GET_NETWORK_DATA = gql`
-  query GetNetworkData($limit: Int = 100, $minFollowers: Int = 0, $minHashtagUsage: Int = 5, $minTweets: Int = 0) {
-    networkData(limit: $limit, minFollowers: $minFollowers, minHashtagUsage: $minHashtagUsage, minTweets: $minTweets) {
+  query GetNetworkData(
+    $limit: Int = 100
+    $minFollowers: Int = 0
+    $minHashtagUsage: Int = 5
+    $minTweets: Int = 0
+  ) {
+    networkData(
+      limit: $limit
+      minFollowers: $minFollowers
+      minHashtagUsage: $minHashtagUsage
+      minTweets: $minTweets
+    ) {
       nodes {
         id
         label
@@ -188,4 +198,3 @@ export const GET_HASHTAG = gql`
     }
   }
 `;
-

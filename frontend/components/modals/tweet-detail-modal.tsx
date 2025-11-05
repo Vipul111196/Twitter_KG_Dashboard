@@ -1,10 +1,16 @@
-'use client';
+"use client";
 
-import { useQuery } from '@apollo/client/react';
-import { Heart, Calendar } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Skeleton } from '@/components/ui/skeleton';
-import { gql } from '@apollo/client';
+import { useQuery } from "@apollo/client/react";
+import { Heart, Calendar } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import { gql } from "@apollo/client";
 
 const GET_TWEET = gql`
   query GetTweet($tweetId: String!) {
@@ -24,13 +30,18 @@ interface TweetDetailModalProps {
 
 /**
  * Tweet Detail Modal
- * 
+ *
  * Shows detailed information about a tweet when clicked in network graph.
  * Fetches tweet data from backend using tweet ID.
  */
 export function TweetDetailModal({ tweetId, onClose }: TweetDetailModalProps) {
   const { data, loading, error } = useQuery<{
-    tweet: { id: string; text: string; created_at?: string; favorites?: number };
+    tweet: {
+      id: string;
+      text: string;
+      created_at?: string;
+      favorites?: number;
+    };
   }>(GET_TWEET, {
     variables: { tweetId },
     skip: !tweetId,
@@ -43,9 +54,7 @@ export function TweetDetailModal({ tweetId, onClose }: TweetDetailModalProps) {
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Tweet Details</DialogTitle>
-          <DialogDescription>
-            View tweet content and metadata
-          </DialogDescription>
+          <DialogDescription>View tweet content and metadata</DialogDescription>
         </DialogHeader>
 
         {loading ? (
@@ -55,7 +64,7 @@ export function TweetDetailModal({ tweetId, onClose }: TweetDetailModalProps) {
           </div>
         ) : error || !tweet ? (
           <div className="text-center py-8 text-muted-foreground">
-            {error ? 'Error loading tweet' : 'Tweet not found'}
+            {error ? "Error loading tweet" : "Tweet not found"}
           </div>
         ) : (
           <div className="space-y-6">
@@ -90,4 +99,3 @@ export function TweetDetailModal({ tweetId, onClose }: TweetDetailModalProps) {
     </Dialog>
   );
 }
-

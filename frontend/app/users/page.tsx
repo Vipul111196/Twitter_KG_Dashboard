@@ -1,19 +1,24 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useMemo } from 'react';
-import { useQuery } from '@apollo/client/react';
-import { Search, Users as UsersIcon, Filter, ArrowUpDown } from 'lucide-react';
-import { DashboardLayout } from '@/components/dashboard/dashboard-layout';
-import { UserDetailModal } from '@/components/modals/user-detail-modal';
-import { Card } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Slider } from '@/components/ui/slider';
-import { gql } from '@apollo/client';
-import type { User, UsersByMinFollowersResponse, TopUsersByTweetsResponse, SearchUsersResponse } from '@/lib/types';
+import { useState, useEffect, useMemo } from "react";
+import { useQuery } from "@apollo/client/react";
+import { Search, Users as UsersIcon, Filter, ArrowUpDown } from "lucide-react";
+import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
+import { UserDetailModal } from "@/components/modals/user-detail-modal";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Slider } from "@/components/ui/slider";
+import { gql } from "@apollo/client";
+import type {
+  User,
+  UsersByMinFollowersResponse,
+  TopUsersByTweetsResponse,
+  SearchUsersResponse,
+} from "@/lib/types";
 
 /**
  * Users Page
- * 
+ *
  * Search and browse Twitter users from the Neo4j database.
  * Shows user profiles with follower counts and profile images.
  * Includes minimum followers filter and click-to-view-details.
@@ -55,42 +60,45 @@ const SEARCH_USERS = gql`
   }
 `;
 
-type SortOption = 'followers' | 'tweets';
+type SortOption = "followers" | "tweets";
 
 export default function UsersPage() {
   type UserScreenName = string;
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [minFollowers, setMinFollowers] = useState(0);
-  const [sortBy, setSortBy] = useState<SortOption>('followers');
+  const [sortBy, setSortBy] = useState<SortOption>("followers");
   const [selectedUser, setSelectedUser] = useState<UserScreenName | null>(null);
 
   // Query for users by followers
-  const { data: followerData, loading: followerLoading, error: followerError } = useQuery<UsersByMinFollowersResponse>(
-    GET_USERS_BY_MIN_FOLLOWERS,
-    {
-      variables: { minFollowers, limit: 30 },
-      skip: !!debouncedQuery || sortBy === 'tweets',
-    }
-  );
+  const {
+    data: followerData,
+    loading: followerLoading,
+    error: followerError,
+  } = useQuery<UsersByMinFollowersResponse>(GET_USERS_BY_MIN_FOLLOWERS, {
+    variables: { minFollowers, limit: 30 },
+    skip: !!debouncedQuery || sortBy === "tweets",
+  });
 
   // Query for users by tweet count
-  const { data: tweetData, loading: tweetLoading, error: tweetError } = useQuery<TopUsersByTweetsResponse>(
-    GET_TOP_USERS_BY_TWEETS,
-    {
-      variables: { limit: 30 },
-      skip: !!debouncedQuery || sortBy === 'followers',
-    }
-  );
+  const {
+    data: tweetData,
+    loading: tweetLoading,
+    error: tweetError,
+  } = useQuery<TopUsersByTweetsResponse>(GET_TOP_USERS_BY_TWEETS, {
+    variables: { limit: 30 },
+    skip: !!debouncedQuery || sortBy === "followers",
+  });
 
   // Query for search results
-  const { data: searchData, loading: searchLoading, error: searchError } = useQuery<SearchUsersResponse>(
-    SEARCH_USERS,
-    {
-      variables: { query: debouncedQuery, limit: 30 },
-      skip: !debouncedQuery,
-    }
-  );
+  const {
+    data: searchData,
+    loading: searchLoading,
+    error: searchError,
+  } = useQuery<SearchUsersResponse>(SEARCH_USERS, {
+    variables: { query: debouncedQuery, limit: 30 },
+    skip: !debouncedQuery,
+  });
 
   // Debounce search input
   useEffect(() => {
@@ -105,14 +113,22 @@ export default function UsersPage() {
     if (debouncedQuery) {
       return searchData?.searchUsers || [];
     }
-    if (sortBy === 'tweets') {
+    if (sortBy === "tweets") {
       return tweetData?.topUsersByTweets || [];
     }
     return followerData?.usersByMinFollowers || [];
   }, [debouncedQuery, searchData, sortBy, tweetData, followerData]);
 
-  const loading = debouncedQuery ? searchLoading : (sortBy === 'tweets' ? tweetLoading : followerLoading);
-  const error = debouncedQuery ? searchError : (sortBy === 'tweets' ? tweetError : followerError);
+  const loading = debouncedQuery
+    ? searchLoading
+    : sortBy === "tweets"
+      ? tweetLoading
+      : followerLoading;
+  const error = debouncedQuery
+    ? searchError
+    : sortBy === "tweets"
+      ? tweetError
+      : followerError;
 
   return (
     <DashboardLayout>
@@ -171,7 +187,7 @@ export default function UsersPage() {
                 </div>
 
                 {/* Min Followers Filter - Only show when sorting by followers */}
-                {sortBy === 'followers' && (
+                {sortBy === "followers" && (
                   <div>
                     <label className="text-sm font-medium mb-2 block">
                       Minimum Followers: {minFollowers.toLocaleString()}
@@ -206,43 +222,57 @@ export default function UsersPage() {
             </>
           ) : error ? (
             <Card className="p-6 md:col-span-2 lg:col-span-3">
-              <p className="text-destructive">Error loading users: {error.message}</p>
+              <p className="text-destructive">
+                Error loading users: {error.message}
+              </p>
             </Card>
           ) : !users || users.length === 0 ? (
             <Card className="p-6 md:col-span-2 lg:col-span-3">
               <p className="text-muted-foreground text-center">
-                {searchQuery ? 'No users found. Try a different search term.' : 'No users found with the selected filters.'}
+                {searchQuery
+                  ? "No users found. Try a different search term."
+                  : "No users found with the selected filters."}
               </p>
             </Card>
           ) : (
             users?.map((user: User) => (
-              <Card 
-                key={user.screen_name} 
+              <Card
+                key={user.screen_name}
                 className="p-6 hover:shadow-lg transition-shadow cursor-pointer hover:border-primary"
                 onClick={() => setSelectedUser(user.screen_name)}
               >
                 <div className="flex items-start gap-4">
                   {/* Profile Image */}
                   <div className="rounded-full bg-primary/10 w-16 h-16 flex items-center justify-center flex-shrink-0">
-                      <UsersIcon className="h-8 w-8 text-primary" />
+                    <UsersIcon className="h-8 w-8 text-primary" />
                   </div>
 
                   {/* User Info */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-lg truncate">{user.name}</h3>
+                    <h3 className="font-semibold text-lg truncate">
+                      {user.name}
+                    </h3>
                     <p className="text-sm text-muted-foreground truncate">
                       @{user.screen_name}
                     </p>
-                    
+
                     {/* Stats */}
                     <div className="flex gap-4 mt-3 text-sm">
                       <div>
-                        <span className="font-semibold">{user.followers?.toLocaleString() || 0}</span>
-                        <span className="text-muted-foreground ml-1">followers</span>
+                        <span className="font-semibold">
+                          {user.followers?.toLocaleString() || 0}
+                        </span>
+                        <span className="text-muted-foreground ml-1">
+                          followers
+                        </span>
                       </div>
                       <div>
-                        <span className="font-semibold">{user.following?.toLocaleString() || 0}</span>
-                        <span className="text-muted-foreground ml-1">following</span>
+                        <span className="font-semibold">
+                          {user.following?.toLocaleString() || 0}
+                        </span>
+                        <span className="text-muted-foreground ml-1">
+                          following
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -262,4 +292,3 @@ export default function UsersPage() {
     </DashboardLayout>
   );
 }
-
