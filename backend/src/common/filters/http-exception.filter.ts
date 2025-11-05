@@ -5,24 +5,27 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { GqlArgumentsHost, GqlExceptionFilter } from '@nestjs/graphql';
+import { GqlExceptionFilter } from '@nestjs/graphql';
+import { Response, Request } from 'express';
 
 /**
  * Global exception filter for handling HTTP and GraphQL errors
  * Follows the principle of robustness: fail loudly with clear error messages
  */
 @Catch()
-export class AllExceptionsFilter implements ExceptionFilter, GqlExceptionFilter {
+export class AllExceptionsFilter
+  implements ExceptionFilter, GqlExceptionFilter
+{
   catch(exception: unknown, host: ArgumentsHost) {
     // Check if this is a GraphQL context
     if (host.getType().toString() === 'graphql') {
-      return this.catchGraphQLException(exception, host);
+      return this.catchGraphQLException(exception);
     }
 
     // Handle REST API exceptions
     const ctx = host.switchToHttp();
-    const response = ctx.getResponse();
-    const request = ctx.getRequest();
+    const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest<Request>();
 
     const status =
       exception instanceof HttpException
@@ -42,9 +45,7 @@ export class AllExceptionsFilter implements ExceptionFilter, GqlExceptionFilter 
     });
   }
 
-  catchGraphQLException(exception: unknown, host: ArgumentsHost) {
-    const gqlHost = GqlArgumentsHost.create(host);
-    
+  catchGraphQLException(exception: unknown) {
     if (exception instanceof HttpException) {
       return exception;
     }
@@ -57,4 +58,3 @@ export class AllExceptionsFilter implements ExceptionFilter, GqlExceptionFilter 
     throw new Error('An unexpected error occurred');
   }
 }
-

@@ -5,7 +5,6 @@ import { Neo4jService } from './database/neo4j.service';
 
 describe('AppController', () => {
   let appController: AppController;
-  let appService: AppService;
 
   beforeEach(async () => {
     const mockNeo4jService = {
@@ -25,7 +24,6 @@ describe('AppController', () => {
     }).compile();
 
     appController = app.get<AppController>(AppController);
-    appService = app.get<AppService>(AppService);
   });
 
   describe('root', () => {

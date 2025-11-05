@@ -1,4 +1,3 @@
-import { gql } from '@apollo/client';
 import {
   GET_DASHBOARD_STATS,
   GET_NETWORK_DATA,

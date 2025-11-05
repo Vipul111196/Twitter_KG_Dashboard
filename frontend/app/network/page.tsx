@@ -11,6 +11,7 @@ import { HashtagDetailModal } from '@/components/modals/hashtag-detail-modal';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { GET_NETWORK_DATA } from '@/lib/graphql/queries';
+import type { NetworkDataResponse } from '@/lib/types';
 
 /**
  * Network Visualization Page
@@ -23,15 +24,17 @@ export default function NetworkPage() {
   const [nodeLimit, setNodeLimit] = useState(50);
   const [minFollowers, setMinFollowers] = useState(0);
   const [minHashtagUsage, setMinHashtagUsage] = useState(5);
+  const [minTweets, setMinTweets] = useState(0);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [selectedTweet, setSelectedTweet] = useState<string | null>(null);
   const [selectedHashtag, setSelectedHashtag] = useState<string | null>(null);
 
-  const { data, loading, error } = useQuery(GET_NETWORK_DATA, {
+  const { data, loading, error } = useQuery<NetworkDataResponse>(GET_NETWORK_DATA, {
     variables: { 
       limit: nodeLimit,
       minFollowers: minFollowers,
       minHashtagUsage: minHashtagUsage,
+      minTweets: minTweets,
     },
   });
 
@@ -41,13 +44,16 @@ export default function NetworkPage() {
     setSelectedTweet(null);
     setSelectedHashtag(null);
 
-    // Set appropriate selection based on node type
-    if (nodeType === 'User') {
+    // Set appropriate selection based on node type (lowercase from backend)
+    const normalizedType = nodeType.toLowerCase();
+    if (normalizedType === 'user') {
       setSelectedUser(nodeId);
-    } else if (nodeType === 'Tweet') {
+    } else if (normalizedType === 'tweet') {
       setSelectedTweet(nodeId);
-    } else if (nodeType === 'Hashtag') {
-      setSelectedHashtag(nodeId);
+    } else if (normalizedType === 'hashtag') {
+      // Remove '#' prefix if present
+      const hashtagName = nodeId.startsWith('#') ? nodeId.slice(1) : nodeId;
+      setSelectedHashtag(hashtagName);
     }
   };
 
@@ -72,7 +78,7 @@ export default function NetworkPage() {
             <h3 className="font-semibold">Controls & Filters</h3>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Node Limit */}
             <div>
               <label className="text-sm font-medium mb-2 block">
@@ -83,7 +89,7 @@ export default function NetworkPage() {
                 onValueChange={(value) => setNodeLimit(value[0])}
                 min={10}
                 max={200}
-                step={10}
+                step={1}
                 className="w-full"
               />
               <p className="text-xs text-muted-foreground mt-2">
@@ -101,11 +107,29 @@ export default function NetworkPage() {
                 onValueChange={(value) => setMinFollowers(value[0])}
                 min={0}
                 max={50000}
-                step={1000}
+                step={1}
                 className="w-full"
               />
               <p className="text-xs text-muted-foreground mt-2">
                 Filter users by minimum follower count (0 = all users)
+              </p>
+            </div>
+
+            {/* Min Tweets Filter */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                Minimum Tweets: {minTweets}
+              </label>
+              <Slider
+                value={[minTweets]}
+                onValueChange={(value) => setMinTweets(value[0])}
+                min={0}
+                max={100}
+                step={1}
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground mt-2">
+                Filter users by minimum tweet count (0 = all users)
               </p>
             </div>
 
@@ -119,7 +143,7 @@ export default function NetworkPage() {
                 onValueChange={(value) => setMinHashtagUsage(value[0])}
                 min={5}
                 max={100}
-                step={5}
+                step={1}
                 className="w-full"
               />
               <p className="text-xs text-muted-foreground mt-2">

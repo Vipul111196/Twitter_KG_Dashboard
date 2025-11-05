@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import cytoscape from 'cytoscape';
+import type { CytoscapeEvent } from '@/lib/types';
 
 /**
  * Network Graph Component
@@ -32,33 +33,32 @@ interface NetworkGraphProps {
 export function NetworkGraph({ nodes, edges, onNodeClick }: NetworkGraphProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const cyRef = useRef<cytoscape.Core | null>(null);
-  const layoutRef = useRef<any>(null);
+  const layoutRef = useRef<cytoscape.Layouts | null>(null);
   const isDestroyedRef = useRef(false);
 
   useEffect(() => {
     if (!containerRef.current || nodes.length === 0) return;
+
+    // Capture the container element for cleanup
+    const container = containerRef.current;
 
     // Reset destroyed flag
     isDestroyedRef.current = false;
 
     // Clean up previous instance if it exists
     if (cyRef.current) {
-      try {
         cyRef.current.destroy();
-      } catch (e) {
-        // Ignore
-      }
       cyRef.current = null;
     }
 
     // Clear the container
-    if (containerRef.current) {
-      containerRef.current.innerHTML = '';
+    if (container) {
+      container.innerHTML = '';
     }
 
     // Initialize Cytoscape
     const cy = cytoscape({
-      container: containerRef.current,
+      container,
       elements: {
         nodes: nodes.map((node) => ({
           data: {
@@ -164,40 +164,28 @@ export function NetworkGraph({ nodes, edges, onNodeClick }: NetworkGraphProps) {
     });
 
     // Define event handlers with destroyed check
-    const handleMouseOver = (event: any) => {
+    const handleMouseOver = (event: CytoscapeEvent) => {
       if (!isDestroyedRef.current && cyRef.current) {
-        try {
           event.target.style('background-color', '#6366f1');
           document.body.style.cursor = 'pointer';
-        } catch (e) {
-          // Ignore errors
-        }
       }
     };
 
-    const handleMouseOut = (event: any) => {
+    const handleMouseOut = (event: CytoscapeEvent) => {
       if (!isDestroyedRef.current && cyRef.current) {
-        try {
           const type = event.target.data('type');
           const color = type === 'User' || type === 'user' ? '#3b82f6' : type === 'Tweet' ? '#10b981' : '#f59e0b';
           event.target.style('background-color', color);
           document.body.style.cursor = 'default';
-        } catch (e) {
-          // Ignore errors
-        }
       }
     };
 
-    const handleTap = (event: any) => {
+    const handleTap = (event: CytoscapeEvent) => {
       if (!isDestroyedRef.current && cyRef.current) {
-        try {
-          const nodeId = event.target.data('id');
-          const nodeType = event.target.data('type');
+          const nodeId = event.target.data('id') as string;
+          const nodeType = event.target.data('type') as string;
           if (onNodeClick && nodeId && nodeType) {
-            onNodeClick(nodeId, nodeType);
-          }
-        } catch (e) {
-          // Ignore errors
+            onNodeClick(nodeId as string, nodeType as string);
         }
       }
     };
@@ -242,36 +230,23 @@ export function NetworkGraph({ nodes, edges, onNodeClick }: NetworkGraphProps) {
       
       // Stop layout IMMEDIATELY
       if (layoutRef.current) {
-        try {
           layoutRef.current.stop();
           layoutRef.current = null;
-        } catch (e) {
-          // Ignore
-        }
       }
       
       // Clean up Cytoscape instance
       if (cyRef.current) {
-        try {
           // Remove all event listeners before destroying
           cyRef.current.removeAllListeners();
           
           // Destroy immediately (no setTimeout)
           cyRef.current.destroy();
           cyRef.current = null;
-        } catch (error) {
-          // Silently ignore errors during cleanup
-          cyRef.current = null;
-        }
       }
 
       // Clear the container HTML
-      if (containerRef.current) {
-        try {
-          containerRef.current.innerHTML = '';
-        } catch (e) {
-          // Ignore
-        }
+      if (container) {
+          container.innerHTML = '';
       }
     };
   }, [nodes, edges, onNodeClick]);

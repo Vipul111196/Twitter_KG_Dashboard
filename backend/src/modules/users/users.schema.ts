@@ -30,4 +30,3 @@ export type SearchUsersInput = z.infer<typeof SearchUsersSchema>;
 export type GetUsersByFollowersInput = z.infer<
   typeof GetUsersByFollowersSchema
 >;
-

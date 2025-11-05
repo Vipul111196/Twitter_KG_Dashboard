@@ -13,13 +13,16 @@ async function bootstrap() {
   // Enable CORS for frontend
   // Allow multiple origins in development (localhost + local IP)
   app.enableCors({
-    origin: (origin, callback) => {
+    origin: (
+      origin: string | undefined,
+      callback: (error: Error | null, allow?: boolean) => void,
+    ) => {
       const allowedOrigins = [
         'http://localhost:3002',
         'http://127.0.0.1:3002',
         'http://192.168.2.117:3002', // Local network IP
       ];
-      
+
       // Allow requests with no origin (like Postman, curl)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
@@ -47,4 +50,5 @@ async function bootstrap() {
   console.log(`🚀 Backend server running on http://localhost:${port}`);
   console.log(`📊 GraphQL Playground: http://localhost:${port}/graphql`);
 }
-bootstrap();
+
+void bootstrap();

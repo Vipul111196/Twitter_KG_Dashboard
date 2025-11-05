@@ -9,5 +9,6 @@ export const GetTrendingHashtagsSchema = z.object({
 });
 
 export type GetHashtagByNameInput = z.infer<typeof GetHashtagByNameSchema>;
-export type GetTrendingHashtagsInput = z.infer<typeof GetTrendingHashtagsSchema>;
-
+export type GetTrendingHashtagsInput = z.infer<
+  typeof GetTrendingHashtagsSchema
+>;

@@ -15,4 +15,3 @@ import { Neo4jModule } from '../../database/neo4j.module';
   exports: [UsersService], // Export for use in other modules
 })
 export class UsersModule {}
-

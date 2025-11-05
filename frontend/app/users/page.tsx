@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Slider } from '@/components/ui/slider';
 import { gql } from '@apollo/client';
+import type { User, UsersByMinFollowersResponse, TopUsersByTweetsResponse, SearchUsersResponse } from '@/lib/types';
 
 /**
  * Users Page
@@ -57,14 +58,15 @@ const SEARCH_USERS = gql`
 type SortOption = 'followers' | 'tweets';
 
 export default function UsersPage() {
+  type UserScreenName = string;
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [minFollowers, setMinFollowers] = useState(0);
   const [sortBy, setSortBy] = useState<SortOption>('followers');
-  const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserScreenName | null>(null);
 
   // Query for users by followers
-  const { data: followerData, loading: followerLoading, error: followerError } = useQuery(
+  const { data: followerData, loading: followerLoading, error: followerError } = useQuery<UsersByMinFollowersResponse>(
     GET_USERS_BY_MIN_FOLLOWERS,
     {
       variables: { minFollowers, limit: 30 },
@@ -73,7 +75,7 @@ export default function UsersPage() {
   );
 
   // Query for users by tweet count
-  const { data: tweetData, loading: tweetLoading, error: tweetError } = useQuery(
+  const { data: tweetData, loading: tweetLoading, error: tweetError } = useQuery<TopUsersByTweetsResponse>(
     GET_TOP_USERS_BY_TWEETS,
     {
       variables: { limit: 30 },
@@ -82,7 +84,7 @@ export default function UsersPage() {
   );
 
   // Query for search results
-  const { data: searchData, loading: searchLoading, error: searchError } = useQuery(
+  const { data: searchData, loading: searchLoading, error: searchError } = useQuery<SearchUsersResponse>(
     SEARCH_USERS,
     {
       variables: { query: debouncedQuery, limit: 30 },
@@ -179,7 +181,7 @@ export default function UsersPage() {
                       onValueChange={(value) => setMinFollowers(value[0])}
                       min={0}
                       max={50000}
-                      step={1000}
+                      step={1}
                       className="w-full"
                     />
                     <p className="text-xs text-muted-foreground mt-2">
@@ -213,7 +215,7 @@ export default function UsersPage() {
               </p>
             </Card>
           ) : (
-            users?.map((user: any) => (
+            users?.map((user: User) => (
               <Card 
                 key={user.screen_name} 
                 className="p-6 hover:shadow-lg transition-shadow cursor-pointer hover:border-primary"
@@ -222,15 +224,7 @@ export default function UsersPage() {
                 <div className="flex items-start gap-4">
                   {/* Profile Image */}
                   <div className="rounded-full bg-primary/10 w-16 h-16 flex items-center justify-center flex-shrink-0">
-                    {user.profile_image_url ? (
-                      <img
-                        src={user.profile_image_url}
-                        alt={user.name}
-                        className="rounded-full w-full h-full object-cover"
-                      />
-                    ) : (
                       <UsersIcon className="h-8 w-8 text-primary" />
-                    )}
                   </div>
 
                   {/* User Info */}

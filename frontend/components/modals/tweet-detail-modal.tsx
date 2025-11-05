@@ -2,7 +2,7 @@
 
 import { useQuery } from '@apollo/client/react';
 import { Heart, Calendar } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { gql } from '@apollo/client';
 
@@ -29,7 +29,9 @@ interface TweetDetailModalProps {
  * Fetches tweet data from backend using tweet ID.
  */
 export function TweetDetailModal({ tweetId, onClose }: TweetDetailModalProps) {
-  const { data, loading, error } = useQuery(GET_TWEET, {
+  const { data, loading, error } = useQuery<{
+    tweet: { id: string; text: string; created_at?: string; favorites?: number };
+  }>(GET_TWEET, {
     variables: { tweetId },
     skip: !tweetId,
   });
@@ -41,6 +43,9 @@ export function TweetDetailModal({ tweetId, onClose }: TweetDetailModalProps) {
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Tweet Details</DialogTitle>
+          <DialogDescription>
+            View tweet content and metadata
+          </DialogDescription>
         </DialogHeader>
 
         {loading ? (
@@ -61,7 +66,7 @@ export function TweetDetailModal({ tweetId, onClose }: TweetDetailModalProps) {
 
             {/* Tweet Metadata */}
             <div className="flex items-center gap-6 text-sm text-muted-foreground border-t pt-4">
-              {tweet.favorites !== null && (
+              {tweet.favorites !== null && tweet.favorites !== undefined && (
                 <div className="flex items-center gap-2">
                   <Heart className="h-4 w-4 text-red-500" />
                   <span>{tweet.favorites.toLocaleString()} likes</span>

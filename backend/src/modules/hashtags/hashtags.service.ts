@@ -1,8 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import neo4j from 'neo4j-driver';
 import { Neo4jService } from '../../database/neo4j.service';
+import {
+  extractNumber,
+  extractString,
+  extractNodeProperties,
+  getRecordField,
+  Neo4jNode,
+} from '../../database/neo4j.types';
 import { HashtagStats } from './hashtags.types';
 import { Hashtag } from '../tweets/tweets.types';
+
+// Define expected hashtag properties from Neo4j
+interface HashtagNodeProperties {
+  name: string;
+}
 
 @Injectable()
 export class HashtagsService {
@@ -20,8 +32,16 @@ export class HashtagsService {
       return null;
     }
 
-    const props = result.records[0].get('h').properties || result.records[0].get('h');
-    return { name: props.name };
+    const node = getRecordField<Neo4jNode<HashtagNodeProperties>>(
+      result.records[0],
+      'h',
+    );
+    if (!node) return null;
+
+    const props = extractNodeProperties<HashtagNodeProperties>(node);
+    if (!props) return null;
+
+    return { name: extractString(props.name) };
   }
 
   async getTrendingHashtags(limit: number = 10): Promise<HashtagStats[]> {
@@ -33,11 +53,13 @@ export class HashtagsService {
       LIMIT $limit
     `;
 
-    const result = await this.neo4jService.executeQuery(query, { limit: neo4j.int(limit) });
+    const result = await this.neo4jService.executeQuery(query, {
+      limit: neo4j.int(limit),
+    });
 
     return result.records.map((record) => ({
-      name: record.get('name'),
-      usageCount: this.extractNumber(record.get('usageCount')),
+      name: extractString(getRecordField(record, 'name')),
+      usageCount: extractNumber(getRecordField(record, 'usageCount')),
     }));
   }
 
@@ -48,14 +70,9 @@ export class HashtagsService {
     `;
 
     const result = await this.neo4jService.executeQuery(query, {});
-    return this.extractNumber(result.records[0].get('count'));
-  }
 
-  private extractNumber(value: any): number {
-    if (value === null || value === undefined) return 0;
-    if (typeof value === 'object' && 'toNumber' in value) return value.toNumber();
-    if (typeof value === 'number') return value;
-    return 0;
+    if (result.records.length === 0) return 0;
+
+    return extractNumber(getRecordField(result.records[0], 'count'));
   }
 }
-

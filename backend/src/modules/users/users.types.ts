@@ -17,7 +17,10 @@ export class User {
   @Field(() => Int, { description: 'Number of followers', nullable: true })
   followers?: number;
 
-  @Field(() => Int, { description: 'Number of accounts followed', nullable: true })
+  @Field(() => Int, {
+    description: 'Number of accounts followed',
+    nullable: true,
+  })
   following?: number;
 
   @Field({ description: 'Profile image URL', nullable: true })
@@ -49,4 +52,3 @@ export class UserStats {
   @Field(() => Int, { description: 'Unique hashtags used' })
   uniqueHashtagsUsed: number;
 }
-

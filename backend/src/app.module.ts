@@ -19,7 +19,7 @@ import configuration from './config/configuration';
       isGlobal: true,
       load: [configuration],
     }),
-    
+
     // GraphQL module - Apollo Server
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
@@ -28,10 +28,10 @@ import configuration from './config/configuration';
       playground: true,
       introspection: true,
     }),
-    
+
     // Neo4j database module
     Neo4jModule,
-    
+
     // Feature modules
     UsersModule,
     TweetsModule,

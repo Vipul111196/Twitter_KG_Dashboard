@@ -21,7 +21,10 @@ export class Tweet {
   @Field({ description: 'Creation timestamp', nullable: true })
   created_at?: string;
 
-  @Field(() => Int, { description: 'Number of favorites/likes', nullable: true })
+  @Field(() => Int, {
+    description: 'Number of favorites/likes',
+    nullable: true,
+  })
   favorites?: number;
 
   @Field({ description: 'Import method', nullable: true })
@@ -42,10 +45,15 @@ export class Hashtag {
  */
 @ObjectType({ description: 'Tweet with author information' })
 export class TweetWithAuthor extends Tweet {
-  @Field(() => User, { description: 'User who posted the tweet', nullable: true })
+  @Field(() => User, {
+    description: 'User who posted the tweet',
+    nullable: true,
+  })
   author?: User;
 
-  @Field(() => [Hashtag], { description: 'Hashtags used in tweet', nullable: true })
+  @Field(() => [Hashtag], {
+    description: 'Hashtags used in tweet',
+    nullable: true,
+  })
   hashtags?: Hashtag[];
 }
-

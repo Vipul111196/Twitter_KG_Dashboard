@@ -12,7 +12,16 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Additional ignores:
+    "coverage/**",
+    "test-results/**",
+    "*.cjs", // CommonJS files (e.g., jest.config.cjs)
   ]),
+  {
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'error',
+    },
+  },
 ]);
 
 export default eslintConfig;

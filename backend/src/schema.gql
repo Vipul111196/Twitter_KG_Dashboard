@@ -94,7 +94,7 @@ type Query {
   hashtag(name: String!): Hashtag
 
   """Get network data for visualization"""
-  networkData(limit: Int! = 100, minFollowers: Int! = 0, minHashtagUsage: Int! = 5): NetworkData!
+  networkData(limit: Int! = 100, minFollowers: Int! = 0, minHashtagUsage: Int! = 5, minTweets: Int! = 0): NetworkData!
 
   """Get most recent tweets"""
   recentTweets(

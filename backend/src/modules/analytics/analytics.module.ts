@@ -9,4 +9,3 @@ import { Neo4jModule } from '../../database/neo4j.module';
   exports: [AnalyticsService],
 })
 export class AnalyticsModule {}
-

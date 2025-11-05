@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { GET_TRENDING_HASHTAGS, GET_TWEETS_BY_HASHTAG } from '@/lib/graphql/queries';
+import type { TrendingHashtagsResponse, TweetsByHashtagResponse, Hashtag } from '@/lib/types';
 
 /**
  * Hashtags Page
@@ -20,7 +21,7 @@ export default function HashtagsPage() {
   const [selectedHashtag, setSelectedHashtag] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: hashtagsData, loading: hashtagsLoading } = useQuery(GET_TRENDING_HASHTAGS, {
+  const { data: hashtagsData, loading: hashtagsLoading } = useQuery<TrendingHashtagsResponse>(GET_TRENDING_HASHTAGS, {
     variables: { limit: 50 },
   });
 
@@ -30,12 +31,12 @@ export default function HashtagsPage() {
     if (!searchQuery.trim()) return hashtagsData.trendingHashtags;
     
     const query = searchQuery.toLowerCase().replace(/^#/, ''); // Remove # if user typed it
-    return hashtagsData.trendingHashtags.filter((hashtag: any) =>
+    return hashtagsData.trendingHashtags.filter((hashtag: Hashtag) =>
       hashtag.name.toLowerCase().includes(query)
     );
   }, [hashtagsData, searchQuery]);
 
-  const { data: tweetsData, loading: tweetsLoading } = useQuery(GET_TWEETS_BY_HASHTAG, {
+  const { data: tweetsData, loading: tweetsLoading, error: tweetsError } = useQuery<TweetsByHashtagResponse>(GET_TWEETS_BY_HASHTAG, {
     variables: { hashtagName: selectedHashtag || '', limit: 10 },
     skip: !selectedHashtag,
   });
@@ -82,11 +83,11 @@ export default function HashtagsPage() {
               </div>
             ) : filteredHashtags.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                <p>No hashtags found matching "{searchQuery}"</p>
+                <p>No hashtags found matching &quot;{searchQuery}&quot;</p>
               </div>
             ) : (
               <div className="space-y-2 max-h-[600px] overflow-y-auto">
-                {filteredHashtags.map((hashtag: any, index: number) => (
+                {filteredHashtags.map((hashtag: Hashtag, index: number) => (
                   <button
                     key={hashtag.name}
                     onClick={() => setSelectedHashtag(hashtag.name)}
@@ -104,7 +105,7 @@ export default function HashtagsPage() {
                         <div>
                           <p className="font-semibold">#{hashtag.name}</p>
                           <p className="text-sm text-muted-foreground">
-                            {hashtag.usageCount.toLocaleString()} tweets
+                            {(hashtag.usageCount || 0).toLocaleString()} tweets
                           </p>
                         </div>
                       </div>
@@ -134,17 +135,23 @@ export default function HashtagsPage() {
                   <Skeleton key={i} className="h-20" />
                 ))}
               </div>
-            ) : tweetsData?.tweetsByHashtag?.length === 0 ? (
+            ) : tweetsError ? (
+              <div className="flex items-center justify-center h-64 text-red-500">
+                <p>Error loading tweets: {tweetsError.message}</p>
+              </div>
+            ) : !tweetsData?.tweetsByHashtag || tweetsData.tweetsByHashtag.length === 0 ? (
               <div className="flex items-center justify-center h-64 text-muted-foreground">
                 <p>No tweets found for this hashtag</p>
               </div>
             ) : (
               <div className="space-y-4 max-h-[600px] overflow-y-auto">
-                {tweetsData?.tweetsByHashtag?.map((tweet: any) => (
+                {tweetsData.tweetsByHashtag.map((tweet) => (
                   <div key={tweet.id} className="p-4 border rounded-lg hover:bg-accent transition-colors">
                     <p className="text-sm">{tweet.text}</p>
                     <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
-                      <span>❤️ {tweet.favorites}</span>
+                      {tweet.favorites !== null && tweet.favorites !== undefined && (
+                        <span>❤️ {tweet.favorites}</span>
+                      )}
                       {tweet.created_at && (
                         <span>
                           {new Date(tweet.created_at).toLocaleDateString()}

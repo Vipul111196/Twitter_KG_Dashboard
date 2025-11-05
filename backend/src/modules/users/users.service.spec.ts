@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import neo4j from 'neo4j-driver';
 import { UsersService } from './users.service';
 import { Neo4jService } from '../../database/neo4j.service';
 
@@ -85,9 +86,9 @@ describe('UsersService', () => {
       );
 
       // Act & Assert
-      await expect(
-        service.getUserByScreenName('neo4j'),
-      ).rejects.toThrow('Database connection failed');
+      await expect(service.getUserByScreenName('neo4j')).rejects.toThrow(
+        'Database connection failed',
+      );
     });
   });
 
@@ -169,7 +170,7 @@ describe('UsersService', () => {
       expect(result).toHaveLength(1);
       expect(neo4jService.executeQuery).toHaveBeenCalledWith(
         expect.stringContaining('WHERE u.followers >= $minFollowers'),
-        { minFollowers, limit },
+        { minFollowers: neo4j.int(minFollowers), limit: neo4j.int(limit) },
       );
     });
 
@@ -210,7 +211,7 @@ describe('UsersService', () => {
       expect(result).toHaveLength(1);
       expect(neo4jService.executeQuery).toHaveBeenCalledWith(
         expect.stringContaining('ORDER BY u.followers DESC'),
-        { limit },
+        { limit: neo4j.int(limit) },
       );
     });
   });
@@ -362,4 +363,3 @@ describe('UsersService', () => {
     });
   });
 });
-

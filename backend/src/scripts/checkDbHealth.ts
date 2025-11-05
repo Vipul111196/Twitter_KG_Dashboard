@@ -4,9 +4,25 @@
  * Validates connection and basic query execution
  */
 
-import neo4j from 'neo4j-driver';
+import neo4j, { Integer } from 'neo4j-driver';
 
-async function checkDbHealth() {
+function extractVersion(value: unknown): string {
+  if (Array.isArray(value) && value.length > 0) {
+    return String(value[0]);
+  }
+  return 'unknown';
+}
+
+function extractCount(value: unknown): number {
+  if (value === null || value === undefined) return 0;
+  if (typeof value === 'number') return value;
+  if (typeof value === 'object' && value !== null && 'toNumber' in value) {
+    return (value as Integer).toNumber();
+  }
+  return 0;
+}
+
+async function checkDbHealth(): Promise<void> {
   console.log('🔍 Checking Neo4j database health...');
 
   const uri = process.env.NEO4J_URI || 'bolt://localhost:7687';
@@ -25,12 +41,16 @@ async function checkDbHealth() {
     try {
       // Get database info
       const result = await session.run('CALL dbms.components() YIELD versions');
-      const version = result.records[0]?.get('versions')[0] || 'unknown';
+      const versionValue: unknown = result.records[0]?.get('versions');
+      const version = extractVersion(versionValue);
       console.log(`✅ Neo4j version: ${version}`);
 
       // Count nodes
-      const countResult = await session.run('MATCH (n) RETURN count(n) as count');
-      const nodeCount = countResult.records[0]?.get('count').toNumber() || 0;
+      const countResult = await session.run(
+        'MATCH (n) RETURN count(n) as count',
+      );
+      const countValue: unknown = countResult.records[0]?.get('count');
+      const nodeCount = extractCount(countValue);
       console.log(`✅ Total nodes: ${nodeCount}`);
 
       if (nodeCount === 0) {
@@ -44,12 +64,12 @@ async function checkDbHealth() {
     await driver.close();
     process.exit(0);
   } catch (error) {
-    console.error('❌ Database health check failed:', error.message);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    console.error('❌ Database health check failed:', errorMessage);
     await driver.close();
     process.exit(1);
   }
 }
 
-checkDbHealth();
-
-
+void checkDbHealth();

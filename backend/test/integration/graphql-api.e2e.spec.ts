@@ -6,10 +6,10 @@ import { AllExceptionsFilter } from '../../src/common/filters/http-exception.fil
 
 /**
  * GraphQL API Integration Tests
- * 
+ *
  * Tests all 17 GraphQL queries against REAL Neo4j database with Twitter v2 data.
  * These are E2E tests that verify the entire stack works correctly.
- * 
+ *
  * Prerequisites:
  * - Neo4j must be running with Twitter v2 data loaded
  * - .env file must have correct NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
@@ -72,8 +72,12 @@ describe('GraphQL API Integration Tests (e2e)', () => {
       expect(response.body.data.dashboardStats).toBeDefined();
       expect(response.body.data.dashboardStats.totalUsers).toBeGreaterThan(0);
       expect(response.body.data.dashboardStats.totalTweets).toBeGreaterThan(0);
-      expect(response.body.data.dashboardStats.totalHashtags).toBeGreaterThan(0);
-      expect(response.body.data.dashboardStats.totalRelationships).toBeGreaterThan(0);
+      expect(response.body.data.dashboardStats.totalHashtags).toBeGreaterThan(
+        0,
+      );
+      expect(
+        response.body.data.dashboardStats.totalRelationships,
+      ).toBeGreaterThan(0);
     });
 
     it('should return network data with nodes and edges', async () => {
@@ -139,9 +143,9 @@ describe('GraphQL API Integration Tests (e2e)', () => {
       expect(response.body.data.searchUsers).toBeInstanceOf(Array);
       expect(response.body.data.searchUsers.length).toBeGreaterThan(0);
       expect(response.body.data.searchUsers.length).toBeLessThanOrEqual(3);
-      
+
       // Verify all results have screen_name containing 'neo4j'
-      response.body.data.searchUsers.forEach(user => {
+      response.body.data.searchUsers.forEach((user) => {
         expect(user.screen_name.toLowerCase()).toContain('neo4j');
         expect(typeof user.followers).toBe('number');
         expect(typeof user.following).toBe('number');
@@ -163,11 +167,13 @@ describe('GraphQL API Integration Tests (e2e)', () => {
       expect(response.body.errors).toBeUndefined();
       expect(response.body.data.tweetsByUser).toBeDefined();
       expect(response.body.data.tweetsByUser).toBeInstanceOf(Array);
-      
+
       if (response.body.data.tweetsByUser.length > 0) {
         expect(response.body.data.tweetsByUser[0]).toHaveProperty('id');
         expect(response.body.data.tweetsByUser[0]).toHaveProperty('text');
-        expect(typeof response.body.data.tweetsByUser[0].favorites).toBe('number');
+        expect(typeof response.body.data.tweetsByUser[0].favorites).toBe(
+          'number',
+        );
       }
     });
 
@@ -185,8 +191,8 @@ describe('GraphQL API Integration Tests (e2e)', () => {
       expect(response.body.errors).toBeUndefined();
       expect(response.body.data.followers).toBeDefined();
       expect(response.body.data.followers).toBeInstanceOf(Array);
-      
-      response.body.data.followers.forEach(user => {
+
+      response.body.data.followers.forEach((user) => {
         expect(user).toHaveProperty('screen_name');
         expect(typeof user.followers).toBe('number');
       });
@@ -206,8 +212,8 @@ describe('GraphQL API Integration Tests (e2e)', () => {
       expect(response.body.errors).toBeUndefined();
       expect(response.body.data.following).toBeDefined();
       expect(response.body.data.following).toBeInstanceOf(Array);
-      
-      response.body.data.following.forEach(user => {
+
+      response.body.data.following.forEach((user) => {
         expect(user).toHaveProperty('screen_name');
         expect(typeof user.followers).toBe('number');
       });
@@ -248,8 +254,8 @@ describe('GraphQL API Integration Tests (e2e)', () => {
       expect(response.body.data.tweetsByUser).toBeDefined();
       expect(response.body.data.tweetsByUser).toBeInstanceOf(Array);
       expect(response.body.data.tweetsByUser.length).toBeLessThanOrEqual(3);
-      
-      response.body.data.tweetsByUser.forEach(tweet => {
+
+      response.body.data.tweetsByUser.forEach((tweet) => {
         expect(tweet).toHaveProperty('id');
         expect(tweet).toHaveProperty('text');
         expect(typeof tweet.favorites).toBe('number');
@@ -270,8 +276,8 @@ describe('GraphQL API Integration Tests (e2e)', () => {
       expect(response.body.errors).toBeUndefined();
       expect(response.body.data.tweetsByHashtag).toBeDefined();
       expect(response.body.data.tweetsByHashtag).toBeInstanceOf(Array);
-      
-      response.body.data.tweetsByHashtag.forEach(tweet => {
+
+      response.body.data.tweetsByHashtag.forEach((tweet) => {
         expect(tweet).toHaveProperty('id');
         expect(typeof tweet.favorites).toBe('number');
       });
@@ -291,8 +297,8 @@ describe('GraphQL API Integration Tests (e2e)', () => {
       expect(response.body.errors).toBeUndefined();
       expect(response.body.data.searchTweets).toBeDefined();
       expect(response.body.data.searchTweets).toBeInstanceOf(Array);
-      
-      response.body.data.searchTweets.forEach(tweet => {
+
+      response.body.data.searchTweets.forEach((tweet) => {
         expect(tweet).toHaveProperty('id');
         expect(tweet).toHaveProperty('text');
         expect(typeof tweet.favorites).toBe('number');
@@ -317,8 +323,8 @@ describe('GraphQL API Integration Tests (e2e)', () => {
       expect(response.body.data.recentTweets).toBeDefined();
       expect(response.body.data.recentTweets).toBeInstanceOf(Array);
       expect(response.body.data.recentTweets.length).toBeLessThanOrEqual(5);
-      
-      response.body.data.recentTweets.forEach(tweet => {
+
+      response.body.data.recentTweets.forEach((tweet) => {
         expect(tweet).toHaveProperty('id');
         expect(typeof tweet.favorites).toBe('number');
       });
@@ -336,7 +342,7 @@ describe('GraphQL API Integration Tests (e2e)', () => {
       `);
 
       expect(response.body.errors).toBeUndefined();
-      
+
       // Hashtag might not exist, which is okay
       if (response.body.data.hashtag !== null) {
         expect(response.body.data.hashtag.name).toBe('neo4j');
@@ -358,17 +364,20 @@ describe('GraphQL API Integration Tests (e2e)', () => {
       expect(response.body.data.trendingHashtags).toBeInstanceOf(Array);
       expect(response.body.data.trendingHashtags.length).toBeGreaterThan(0);
       expect(response.body.data.trendingHashtags.length).toBeLessThanOrEqual(5);
-      
-      response.body.data.trendingHashtags.forEach(hashtag => {
+
+      response.body.data.trendingHashtags.forEach((hashtag) => {
         expect(hashtag).toHaveProperty('name');
         expect(typeof hashtag.usageCount).toBe('number');
         expect(hashtag.usageCount).toBeGreaterThan(0);
       });
-      
+
       // Verify sorted by usageCount DESC
       for (let i = 1; i < response.body.data.trendingHashtags.length; i++) {
-        expect(response.body.data.trendingHashtags[i-1].usageCount)
-          .toBeGreaterThanOrEqual(response.body.data.trendingHashtags[i].usageCount);
+        expect(
+          response.body.data.trendingHashtags[i - 1].usageCount,
+        ).toBeGreaterThanOrEqual(
+          response.body.data.trendingHashtags[i].usageCount,
+        );
       }
     });
 
@@ -423,29 +432,13 @@ describe('GraphQL API Integration Tests (e2e)', () => {
         }
       `);
 
-      // Get actual followers and following
-      const followersResponse = await executeQuery(`
-        query {
-          followers(screenName: "neo4j", limit: 100) {
-            screen_name
-          }
-        }
-      `);
-
-      const followingResponse = await executeQuery(`
-        query {
-          following(screenName: "neo4j", limit: 100) {
-            screen_name
-          }
-        }
-      `);
-
-      // Stats count should be >= actual returned data (since we're limiting)
-      expect(statsResponse.body.data.userStats.followerCount)
-        .toBeGreaterThanOrEqual(0);
-      expect(statsResponse.body.data.userStats.followingCount)
-        .toBeGreaterThanOrEqual(0);
+      // Stats should return non-negative counts
+      expect(
+        statsResponse.body.data.userStats.followerCount,
+      ).toBeGreaterThanOrEqual(0);
+      expect(
+        statsResponse.body.data.userStats.followingCount,
+      ).toBeGreaterThanOrEqual(0);
     });
   });
 });
-

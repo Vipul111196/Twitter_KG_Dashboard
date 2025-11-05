@@ -14,4 +14,3 @@ import { Neo4jModule } from '../../database/neo4j.module';
   exports: [TweetsService],
 })
 export class TweetsModule {}
-

@@ -1,7 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import neo4j from 'neo4j-driver';
 import { Neo4jService } from '../../database/neo4j.service';
+import {
+  extractNumber,
+  extractString,
+  extractNodeProperties,
+  getRecordField,
+  Neo4jNode,
+  Neo4jNumeric,
+} from '../../database/neo4j.types';
 import { User, UserStats } from './users.types';
+
+// Define expected user properties from Neo4j
+interface UserNodeProperties {
+  screen_name: string;
+  name?: string;
+  followers?: Neo4jNumeric;
+  following?: Neo4jNumeric;
+  profile_image_url?: string;
+  location?: string;
+  url?: string;
+}
 
 /**
  * Users Service
@@ -39,7 +58,12 @@ export class UsersService {
       return null;
     }
 
-    const userNode = result.records[0].get('u');
+    const userNode = getRecordField<Neo4jNode<UserNodeProperties>>(
+      result.records[0],
+      'u',
+    );
+    if (!userNode) return null;
+
     return this.mapNodeToUser(userNode);
   }
 
@@ -62,12 +86,15 @@ export class UsersService {
 
     const result = await this.neo4jService.executeQuery(cypherQuery, {
       query: query.toLowerCase(),
-      limit: neo4j.int(limit), // Convert to Neo4j Integer
+      limit: neo4j.int(limit),
     });
 
-    return result.records.map((record) =>
-      this.mapNodeToUser(record.get('u')),
-    );
+    return result.records
+      .map((record) => {
+        const node = getRecordField<Neo4jNode<UserNodeProperties>>(record, 'u');
+        return node ? this.mapNodeToUser(node) : null;
+      })
+      .filter((user): user is User => user !== null);
   }
 
   /**
@@ -89,9 +116,12 @@ export class UsersService {
       limit: neo4j.int(limit),
     });
 
-    return result.records.map((record) =>
-      this.mapNodeToUser(record.get('u')),
-    );
+    return result.records
+      .map((record) => {
+        const node = getRecordField<Neo4jNode<UserNodeProperties>>(record, 'u');
+        return node ? this.mapNodeToUser(node) : null;
+      })
+      .filter((user): user is User => user !== null);
   }
 
   /**
@@ -118,9 +148,12 @@ export class UsersService {
       limit: neo4j.int(limit),
     });
 
-    return result.records.map((record) =>
-      this.mapNodeToUser(record.get('u')),
-    );
+    return result.records
+      .map((record) => {
+        const node = getRecordField<Neo4jNode<UserNodeProperties>>(record, 'u');
+        return node ? this.mapNodeToUser(node) : null;
+      })
+      .filter((user): user is User => user !== null);
   }
 
   /**
@@ -138,13 +171,16 @@ export class UsersService {
       LIMIT $limit
     `;
 
-    const result = await this.neo4jService.executeQuery(query, { 
-      limit: neo4j.int(limit) 
+    const result = await this.neo4jService.executeQuery(query, {
+      limit: neo4j.int(limit),
     });
 
-    return result.records.map((record) =>
-      this.mapNodeToUser(record.get('u')),
-    );
+    return result.records
+      .map((record) => {
+        const node = getRecordField<Neo4jNode<UserNodeProperties>>(record, 'u');
+        return node ? this.mapNodeToUser(node) : null;
+      })
+      .filter((user): user is User => user !== null);
   }
 
   /**
@@ -175,18 +211,14 @@ export class UsersService {
     }
 
     const record = result.records[0];
-    
-    // Handle Neo4j Integer objects
-    const tweetCount = this.extractNumber(record.get('tweetCount'));
-    const followerCount = this.extractNumber(record.get('followerCount'));
-    const followingCount = this.extractNumber(record.get('followingCount'));
-    const uniqueHashtagsUsed = this.extractNumber(record.get('uniqueHashtagsUsed'));
 
     return {
-      tweetCount,
-      followerCount,
-      followingCount,
-      uniqueHashtagsUsed,
+      tweetCount: extractNumber(getRecordField(record, 'tweetCount')),
+      followerCount: extractNumber(getRecordField(record, 'followerCount')),
+      followingCount: extractNumber(getRecordField(record, 'followingCount')),
+      uniqueHashtagsUsed: extractNumber(
+        getRecordField(record, 'uniqueHashtagsUsed'),
+      ),
     };
   }
 
@@ -202,13 +234,15 @@ export class UsersService {
     `;
 
     const result = await this.neo4jService.executeQuery(query, {});
-    
-    return this.extractNumber(result.records[0].get('count'));
+
+    if (result.records.length === 0) return 0;
+
+    return extractNumber(getRecordField(result.records[0], 'count'));
   }
 
   /**
    * Get users who follow the specified user
-   * 
+   *
    * @param screenName - User's screen name
    * @param limit - Maximum number of followers to return
    * @returns Array of follower users
@@ -226,14 +260,20 @@ export class UsersService {
       limit: neo4j.int(limit),
     });
 
-    return result.records.map((record) =>
-      this.mapNodeToUser(record.get('follower')),
-    );
+    return result.records
+      .map((record) => {
+        const node = getRecordField<Neo4jNode<UserNodeProperties>>(
+          record,
+          'follower',
+        );
+        return node ? this.mapNodeToUser(node) : null;
+      })
+      .filter((user): user is User => user !== null);
   }
 
   /**
    * Get users that the specified user follows
-   * 
+   *
    * @param screenName - User's screen name
    * @param limit - Maximum number of following to return
    * @returns Array of users being followed
@@ -251,50 +291,43 @@ export class UsersService {
       limit: neo4j.int(limit),
     });
 
-    return result.records.map((record) =>
-      this.mapNodeToUser(record.get('following')),
-    );
+    return result.records
+      .map((record) => {
+        const node = getRecordField<Neo4jNode<UserNodeProperties>>(
+          record,
+          'following',
+        );
+        return node ? this.mapNodeToUser(node) : null;
+      })
+      .filter((user): user is User => user !== null);
   }
 
   /**
    * Helper: Map Neo4j node to User type
-   * Handles both node objects and plain objects
    */
-  private mapNodeToUser(node: any): User {
-    // Handle Neo4j node object
-    const props = node.properties || node;
+  private mapNodeToUser(node: Neo4jNode<UserNodeProperties>): User {
+    const props = extractNodeProperties<UserNodeProperties>(node);
+    if (!props) {
+      // Fallback if properties extraction fails
+      return {
+        screen_name: '',
+        name: '',
+        followers: 0,
+        following: 0,
+        profile_image_url: undefined,
+        location: undefined,
+        url: undefined,
+      };
+    }
 
     return {
-      screen_name: props.screen_name,
-      name: props.name,
-      followers: this.extractNumber(props.followers),
-      following: this.extractNumber(props.following),
-      profile_image_url: props.profile_image_url,
-      location: props.location,
-      url: props.url,
+      screen_name: extractString(props.screen_name),
+      name: extractString(props.name),
+      followers: extractNumber(props.followers),
+      following: extractNumber(props.following),
+      profile_image_url: extractString(props.profile_image_url) || undefined,
+      location: extractString(props.location) || undefined,
+      url: extractString(props.url) || undefined,
     };
   }
-
-  /**
-   * Helper: Extract number from Neo4j Integer or number
-   * Neo4j returns Integer objects that need conversion
-   */
-  private extractNumber(value: any): number {
-    if (value === null || value === undefined) {
-      return 0;
-    }
-    
-    // Handle Neo4j Integer object
-    if (typeof value === 'object' && 'toNumber' in value) {
-      return value.toNumber();
-    }
-    
-    // Handle regular numbers
-    if (typeof value === 'number') {
-      return value;
-    }
-    
-    return 0;
-  }
 }
-

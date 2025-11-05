@@ -28,4 +28,3 @@ export type GetTweetsByUserInput = z.infer<typeof GetTweetsByUserSchema>;
 export type GetTweetsByHashtagInput = z.infer<typeof GetTweetsByHashtagSchema>;
 export type SearchTweetsInput = z.infer<typeof SearchTweetsSchema>;
 export type GetRecentTweetsInput = z.infer<typeof GetRecentTweetsSchema>;
-

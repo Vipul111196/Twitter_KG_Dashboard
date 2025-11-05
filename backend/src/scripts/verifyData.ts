@@ -4,7 +4,7 @@
  * Checks for expected data structure and relationships
  */
 
-import neo4j from 'neo4j-driver';
+import neo4j, { Integer } from 'neo4j-driver';
 
 interface DataStats {
   users: number;
@@ -15,7 +15,16 @@ interface DataStats {
   tagsRelations: number;
 }
 
-async function verifyData() {
+function extractCount(value: unknown): number {
+  if (value === null || value === undefined) return 0;
+  if (typeof value === 'number') return value;
+  if (typeof value === 'object' && value !== null && 'toNumber' in value) {
+    return (value as Integer).toNumber();
+  }
+  return 0;
+}
+
+async function verifyData(): Promise<void> {
   console.log('🔍 Verifying data integrity...\n');
 
   const uri = process.env.NEO4J_URI || 'bolt://localhost:7687';
@@ -37,24 +46,38 @@ async function verifyData() {
 
     try {
       // Count nodes
-      const userCount = await session.run('MATCH (u:User) RETURN count(u) as count');
-      stats.users = userCount.records[0]?.get('count').toNumber() || 0;
+      const userCount = await session.run(
+        'MATCH (u:User) RETURN count(u) as count',
+      );
+      stats.users = extractCount(userCount.records[0]?.get('count'));
 
-      const tweetCount = await session.run('MATCH (t:Tweet) RETURN count(t) as count');
-      stats.tweets = tweetCount.records[0]?.get('count').toNumber() || 0;
+      const tweetCount = await session.run(
+        'MATCH (t:Tweet) RETURN count(t) as count',
+      );
+      stats.tweets = extractCount(tweetCount.records[0]?.get('count'));
 
-      const hashtagCount = await session.run('MATCH (h:Hashtag) RETURN count(h) as count');
-      stats.hashtags = hashtagCount.records[0]?.get('count').toNumber() || 0;
+      const hashtagCount = await session.run(
+        'MATCH (h:Hashtag) RETURN count(h) as count',
+      );
+      stats.hashtags = extractCount(hashtagCount.records[0]?.get('count'));
 
       // Count relationships
-      const followsCount = await session.run('MATCH ()-[r:FOLLOWS]->() RETURN count(r) as count');
-      stats.followsRelations = followsCount.records[0]?.get('count').toNumber() || 0;
+      const followsCount = await session.run(
+        'MATCH ()-[r:FOLLOWS]->() RETURN count(r) as count',
+      );
+      stats.followsRelations = extractCount(
+        followsCount.records[0]?.get('count'),
+      );
 
-      const postsCount = await session.run('MATCH ()-[r:POSTS]->() RETURN count(r) as count');
-      stats.postsRelations = postsCount.records[0]?.get('count').toNumber() || 0;
+      const postsCount = await session.run(
+        'MATCH ()-[r:POSTS]->() RETURN count(r) as count',
+      );
+      stats.postsRelations = extractCount(postsCount.records[0]?.get('count'));
 
-      const tagsCount = await session.run('MATCH ()-[r:TAGS]->() RETURN count(r) as count');
-      stats.tagsRelations = tagsCount.records[0]?.get('count').toNumber() || 0;
+      const tagsCount = await session.run(
+        'MATCH ()-[r:TAGS]->() RETURN count(r) as count',
+      );
+      stats.tagsRelations = extractCount(tagsCount.records[0]?.get('count'));
 
       // Display results
       console.log('📊 Nodes:');
@@ -72,7 +95,8 @@ async function verifyData() {
       if (stats.users === 0) issues.push('No users found');
       if (stats.tweets === 0) issues.push('No tweets found');
       if (stats.hashtags === 0) issues.push('No hashtags found');
-      if (stats.postsRelations === 0) issues.push('No POSTS relationships found');
+      if (stats.postsRelations === 0)
+        issues.push('No POSTS relationships found');
 
       if (issues.length > 0) {
         console.log('\n⚠️  Issues:');
@@ -88,12 +112,12 @@ async function verifyData() {
     await driver.close();
     process.exit(0);
   } catch (error) {
-    console.error('❌ Data verification failed:', error.message);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    console.error('❌ Data verification failed:', errorMessage);
     await driver.close();
     process.exit(1);
   }
 }
 
-verifyData();
-
-
+void verifyData();

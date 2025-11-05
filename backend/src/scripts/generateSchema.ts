@@ -11,7 +11,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { AppModule } from '../app.module';
 
-async function generateSchema() {
+async function generateSchema(): Promise<void> {
   console.log('🔧 Generating GraphQL schema...');
 
   const app = await NestFactory.create(AppModule, {
@@ -44,9 +44,8 @@ async function generateSchema() {
   process.exit(0);
 }
 
-generateSchema().catch((error) => {
-  console.error('❌ Schema generation failed:', error);
+void generateSchema().catch((error: unknown) => {
+  const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+  console.error('❌ Schema generation failed:', errorMessage);
   process.exit(1);
 });
-
-

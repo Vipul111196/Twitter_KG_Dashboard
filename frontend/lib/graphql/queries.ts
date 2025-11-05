@@ -23,8 +23,8 @@ export const GET_DASHBOARD_STATS = gql`
 `;
 
 export const GET_NETWORK_DATA = gql`
-  query GetNetworkData($limit: Int = 100, $minFollowers: Int = 0, $minHashtagUsage: Int = 5) {
-    networkData(limit: $limit, minFollowers: $minFollowers, minHashtagUsage: $minHashtagUsage) {
+  query GetNetworkData($limit: Int = 100, $minFollowers: Int = 0, $minHashtagUsage: Int = 5, $minTweets: Int = 0) {
+    networkData(limit: $limit, minFollowers: $minFollowers, minHashtagUsage: $minHashtagUsage, minTweets: $minTweets) {
       nodes {
         id
         label

@@ -168,4 +168,3 @@ export class UsersResolver {
     return this.usersService.getFollowing(screenName, limit);
   }
 }
-

@@ -71,7 +71,7 @@ describe('Neo4jService', () => {
       const mockResult = {
         records: [
           {
-            get: jest.fn((key: string) => 1),
+            get: jest.fn(() => 1),
             toObject: jest.fn().mockReturnValue({ result: 1 }),
           },
         ],
@@ -95,7 +95,7 @@ describe('Neo4jService', () => {
       const mockResult = {
         records: [
           {
-            get: jest.fn((key: string) => ({
+            get: jest.fn(() => ({
               properties: {
                 screen_name: 'neo4j',
                 name: 'Neo4j',
@@ -237,4 +237,3 @@ describe('Neo4jService', () => {
     });
   });
 });
-

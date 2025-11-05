@@ -8,4 +8,3 @@ export class HashtagStats {
   @Field(() => Int, { description: 'Number of tweets using this hashtag' })
   usageCount: number;
 }
-

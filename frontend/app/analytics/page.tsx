@@ -7,6 +7,7 @@ import { StatsCard } from '@/components/dashboard/stats-card';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { GET_DASHBOARD_STATS, GET_TRENDING_HASHTAGS } from '@/lib/graphql/queries';
+import type { DashboardStatsResponse, TrendingHashtagsResponse, Hashtag } from '@/lib/types';
 
 /**
  * Analytics Page
@@ -16,8 +17,8 @@ import { GET_DASHBOARD_STATS, GET_TRENDING_HASHTAGS } from '@/lib/graphql/querie
  */
 
 export default function AnalyticsPage() {
-  const { data: statsData, loading: statsLoading } = useQuery(GET_DASHBOARD_STATS);
-  const { data: hashtagsData, loading: hashtagsLoading } = useQuery(GET_TRENDING_HASHTAGS, {
+  const { data: statsData, loading: statsLoading } = useQuery<DashboardStatsResponse>(GET_DASHBOARD_STATS);
+  const { data: hashtagsData, loading: hashtagsLoading } = useQuery<TrendingHashtagsResponse>(GET_TRENDING_HASHTAGS, {
     variables: { limit: 10 },
   });
 
@@ -126,9 +127,9 @@ export default function AnalyticsPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {hashtagsData?.trendingHashtags?.map((hashtag: any, index: number) => {
-                const maxUsage = hashtagsData.trendingHashtags[0]?.usageCount || 1;
-                const percentage = (hashtag.usageCount / maxUsage) * 100;
+              {hashtagsData?.trendingHashtags?.map((hashtag: Hashtag, index: number) => {
+                const maxUsage = hashtagsData.trendingHashtags[0]?.usageCount ?? 1;
+                const percentage = ((hashtag.usageCount ?? 0) / maxUsage) * 100;
                 
                 return (
                   <div key={hashtag.name}>
@@ -140,7 +141,7 @@ export default function AnalyticsPage() {
                         <span className="font-medium">#{hashtag.name}</span>
                       </div>
                       <span className="text-sm text-muted-foreground">
-                        {hashtag.usageCount.toLocaleString()} tweets
+                        {(hashtag.usageCount || 0).toLocaleString()} tweets
                       </span>
                     </div>
                     <div className="w-full bg-accent rounded-full h-2">

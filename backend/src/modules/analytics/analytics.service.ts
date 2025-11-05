@@ -1,7 +1,42 @@
 import { Injectable } from '@nestjs/common';
 import neo4j from 'neo4j-driver';
 import { Neo4jService } from '../../database/neo4j.service';
-import { DashboardStats, NetworkData, NetworkNode, NetworkEdge } from './analytics.types';
+import {
+  extractNumber,
+  extractString,
+  extractNodeProperties,
+  getRecordField,
+  Neo4jNode,
+  Neo4jNumeric,
+  Neo4jValue,
+} from '../../database/neo4j.types';
+import {
+  DashboardStats,
+  NetworkData,
+  NetworkNode,
+  NetworkEdge,
+} from './analytics.types';
+
+// Type definitions for Neo4j node properties
+interface UserProperties {
+  screen_name: string;
+  name?: string;
+  followers: Neo4jNumeric;
+  following?: Neo4jNumeric;
+}
+
+interface TweetProperties {
+  id_str?: string;
+  id?: Neo4jValue;
+  text?: string;
+  created_at?: string;
+  favorites?: Neo4jNumeric;
+  import_method?: string;
+}
+
+interface HashtagProperties {
+  name: string;
+}
 
 @Injectable()
 export class AnalyticsService {
@@ -22,11 +57,20 @@ export class AnalyticsService {
     const result = await this.neo4jService.executeQuery(query, {});
     const record = result.records[0];
 
+    if (!record) {
+      return {
+        totalUsers: 0,
+        totalTweets: 0,
+        totalHashtags: 0,
+        totalRelationships: 0,
+      };
+    }
+
     return {
-      totalUsers: this.extractNumber(record.get('userCount')),
-      totalTweets: this.extractNumber(record.get('tweetCount')),
-      totalHashtags: this.extractNumber(record.get('hashtagCount')),
-      totalRelationships: this.extractNumber(record.get('relCount')),
+      totalUsers: extractNumber(getRecordField(record, 'userCount')),
+      totalTweets: extractNumber(getRecordField(record, 'tweetCount')),
+      totalHashtags: extractNumber(getRecordField(record, 'hashtagCount')),
+      totalRelationships: extractNumber(getRecordField(record, 'relCount')),
     };
   }
 
@@ -34,6 +78,7 @@ export class AnalyticsService {
     limit: number = 100,
     minFollowers: number = 0,
     minHashtagUsage: number = 5,
+    minTweets: number = 0,
   ): Promise<NetworkData> {
     // Build a rich, connected network with Users, Tweets, and Hashtags
     const query = `
@@ -46,7 +91,10 @@ export class AnalyticsService {
       
       // Get some tweets from these users
       OPTIONAL MATCH (u1)-[:POSTS]->(t:Tweet)
-      WITH u1, u2, u3, COLLECT(DISTINCT t)[0..2] AS tweets
+      WITH u1, u2, u3, COLLECT(DISTINCT t)[0..2] AS tweets, 
+           SIZE([(u1)-[:POSTS]->(:Tweet) | 1]) AS u1TweetCount,
+           SIZE([(u2)-[:POSTS]->(:Tweet) | 1]) AS u2TweetCount
+      WHERE u1TweetCount >= $minTweets AND u2TweetCount >= $minTweets
       
       // Get hashtags from tweets, filtered by usage frequency
       UNWIND CASE WHEN SIZE(tweets) > 0 THEN tweets ELSE [null] END AS tweet
@@ -64,10 +112,11 @@ export class AnalyticsService {
 
     const pathLimit = Math.max(Math.ceil(limit / 4), 10);
 
-    const result = await this.neo4jService.executeQuery(query, { 
+    const result = await this.neo4jService.executeQuery(query, {
       pathLimit: neo4j.int(pathLimit),
       minFollowers: neo4j.int(minFollowers),
       minHashtagUsage: neo4j.int(minHashtagUsage),
+      minTweets: neo4j.int(minTweets),
     });
 
     const nodes: Map<string, NetworkNode> = new Map();
@@ -75,24 +124,35 @@ export class AnalyticsService {
     const edgeSet = new Set<string>();
 
     result.records.forEach((record) => {
-      const u1 = record.get('u1');
-      const u2 = record.get('u2');
-      const u3 = record.get('u3');
-      const tweet = record.get('tweet');
-      const h = record.get('h');
+      const u1 = getRecordField<Neo4jNode<UserProperties>>(record, 'u1');
+      const u2 = getRecordField<Neo4jNode<UserProperties>>(record, 'u2');
+      const u3 = getRecordField<Neo4jNode<UserProperties>>(record, 'u3');
+      const tweet = getRecordField<Neo4jNode<TweetProperties>>(record, 'tweet');
+      const h = getRecordField<Neo4jNode<HashtagProperties>>(record, 'h');
 
       // Helper to add user
-      const addUser = (user: any) => {
+      const addUser = (
+        user: Neo4jNode<UserProperties> | null,
+      ): string | null => {
         if (!user) return null;
-        const props = user.properties || user;
-        const id = props.screen_name;
-        
+        const props = extractNodeProperties<UserProperties>(user);
+        if (!props) return null;
+
+        const id = extractString(props.screen_name);
+        if (!id) return null;
+
         if (!nodes.has(id)) {
           nodes.set(id, {
             id,
-            label: props.screen_name,
-            type: 'User',
-            size: Math.round(Math.min(40, Math.max(25, Math.log(this.extractNumber(props.followers) + 1) * 3))),
+            label:
+              extractString(props.name) || extractString(props.screen_name),
+            type: 'user',
+            size: Math.round(
+              Math.min(
+                40,
+                Math.max(25, Math.log(extractNumber(props.followers) + 1) * 3),
+              ),
+            ),
           });
         }
         return id;
@@ -111,7 +171,7 @@ export class AnalyticsService {
           edgeSet.add(key);
         }
       }
-      
+
       if (u2Id && u3Id) {
         const key = `${u2Id}->${u3Id}`;
         if (!edgeSet.has(key)) {
@@ -122,14 +182,19 @@ export class AnalyticsService {
 
       // Add tweet (only if we haven't hit limit)
       if (tweet && u1Id && nodes.size < limit * 1.5) {
-        const tProps = tweet.properties || tweet;
-        const tId = String(tProps.id_str || tProps.id);
-        
+        const tProps = extractNodeProperties<TweetProperties>(tweet);
+        if (!tProps) return;
+
+        const tId = extractString(tProps.id_str || tProps.id);
+        if (!tId) return;
+
         if (!nodes.has(tId)) {
+          const text = extractString(tProps.text) || 'Tweet';
+          const label = text.substring(0, 20);
           nodes.set(tId, {
             id: tId,
-            label: (tProps.text || 'Tweet').substring(0, 20),
-            type: 'Tweet',
+            label,
+            type: 'tweet',
             size: 15,
           });
 
@@ -141,14 +206,19 @@ export class AnalyticsService {
 
           // Add hashtag
           if (h && nodes.size < limit * 2) {
-            const hProps = h.properties || h;
-            const hId = `#${hProps.name}`;
-            
+            const hProps = extractNodeProperties<HashtagProperties>(h);
+            if (!hProps) return;
+
+            const hashtagName = extractString(hProps.name);
+            if (!hashtagName) return;
+
+            const hId = `#${hashtagName}`;
+
             if (!nodes.has(hId)) {
               nodes.set(hId, {
                 id: hId,
-                label: `#${hProps.name}`,
-                type: 'Hashtag',
+                label: `#${hashtagName}`,
+                type: 'hashtag',
                 size: 18,
               });
             }
@@ -168,12 +238,4 @@ export class AnalyticsService {
       edges,
     };
   }
-
-  private extractNumber(value: any): number {
-    if (value === null || value === undefined) return 0;
-    if (typeof value === 'object' && 'toNumber' in value) return value.toNumber();
-    if (typeof value === 'number') return value;
-    return 0;
-  }
 }
-

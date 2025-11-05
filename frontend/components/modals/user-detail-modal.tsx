@@ -1,11 +1,12 @@
 'use client';
 
 import { useQuery } from '@apollo/client/react';
-import { User as UserIcon, Calendar, MapPin, Link as LinkIcon, Hash } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { User as UserIcon, Calendar, MapPin, Link as LinkIcon } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GET_USER_BY_SCREEN_NAME, GET_USER_TWEETS, GET_USER_STATS } from '@/lib/graphql/queries';
+import type { UserResponse, TweetsByUserResponse, UserStatsResponse } from '@/lib/types';
 
 /**
  * User Detail Modal Component
@@ -24,17 +25,17 @@ interface UserDetailModalProps {
 }
 
 export function UserDetailModal({ screenName, open, onClose }: UserDetailModalProps) {
-  const { data: userData, loading: userLoading, error: userError } = useQuery(GET_USER_BY_SCREEN_NAME, {
+  const { data: userData, loading: userLoading } = useQuery<UserResponse>(GET_USER_BY_SCREEN_NAME, {
     variables: { screenName },
     skip: !screenName,
   });
 
-  const { data: tweetsData, loading: tweetsLoading, error: tweetsError } = useQuery(GET_USER_TWEETS, {
+  const { data: tweetsData, loading: tweetsLoading, error: tweetsError } = useQuery<TweetsByUserResponse>(GET_USER_TWEETS, {
     variables: { screenName, limit: 10 },
     skip: !screenName,
   });
 
-  const { data: statsData, loading: statsLoading, error: statsError } = useQuery(GET_USER_STATS, {
+  const { data: statsData, loading: statsLoading, error: statsError } = useQuery<UserStatsResponse>(GET_USER_STATS, {
     variables: { screenName },
     skip: !screenName,
   });
@@ -51,6 +52,9 @@ export function UserDetailModal({ screenName, open, onClose }: UserDetailModalPr
             <UserIcon className="h-5 w-5" />
             User Profile
           </DialogTitle>
+          <DialogDescription>
+            View detailed information about this user
+          </DialogDescription>
         </DialogHeader>
 
         {userLoading ? (
@@ -134,14 +138,14 @@ export function UserDetailModal({ screenName, open, onClose }: UserDetailModalPr
                     <p className="text-xs mt-2">This user may have no tweets in the dataset</p>
                   </div>
                 ) : (
-                  tweets.map((tweet: any) => (
+                  tweets.map((tweet: { id: string; text: string; created_at?: string; favorites?: number }) => (
                     <Card key={tweet.id} className="p-4">
                       <p className="text-sm">{tweet.text}</p>
                       {tweet.created_at && (
                         <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                           <Calendar className="h-3 w-3" />
                           <span>{new Date(tweet.created_at).toLocaleDateString()}</span>
-                          {tweet.favorites > 0 && (
+                          {tweet.favorites !== undefined && tweet.favorites > 0 && (
                             <span className="ml-auto">❤️ {tweet.favorites}</span>
                           )}
                         </div>

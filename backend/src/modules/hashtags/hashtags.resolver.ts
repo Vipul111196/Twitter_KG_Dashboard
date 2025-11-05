@@ -33,4 +33,3 @@ export class HashtagsResolver {
     return this.hashtagsService.getTotalHashtagCount();
   }
 }
-

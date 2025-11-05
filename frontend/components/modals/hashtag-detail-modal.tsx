@@ -2,9 +2,10 @@
 
 import { useQuery } from '@apollo/client/react';
 import { Hash, TrendingUp } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { gql } from '@apollo/client';
+// Types are inferred from GraphQL response
 
 const GET_HASHTAG_DETAILS = gql`
   query GetHashtagDetails($name: String!) {
@@ -32,7 +33,10 @@ interface HashtagDetailModalProps {
  * Displays hashtag info and recent tweets using this hashtag.
  */
 export function HashtagDetailModal({ hashtagName, onClose }: HashtagDetailModalProps) {
-  const { data, loading, error } = useQuery(GET_HASHTAG_DETAILS, {
+  const { data, loading } = useQuery<{
+    hashtag: { name: string };
+    tweetsByHashtag: Array<{ id: string; text: string; created_at?: string; favorites?: number }>;
+  }>(GET_HASHTAG_DETAILS, {
     variables: { name: hashtagName },
     skip: !hashtagName,
   });
@@ -48,6 +52,9 @@ export function HashtagDetailModal({ hashtagName, onClose }: HashtagDetailModalP
             <Hash className="h-5 w-5 text-amber-500" />
             Hashtag Details
           </DialogTitle>
+          <DialogDescription>
+            View hashtag information and related tweets
+          </DialogDescription>
         </DialogHeader>
 
         {loading ? (
@@ -55,9 +62,9 @@ export function HashtagDetailModal({ hashtagName, onClose }: HashtagDetailModalP
             <Skeleton className="h-16" />
             <Skeleton className="h-48" />
           </div>
-        ) : error || !hashtag ? (
+        ) : !hashtag ? (
           <div className="text-center py-8 text-muted-foreground">
-            {error ? 'Error loading hashtag' : 'Hashtag not found'}
+            Hashtag not found
           </div>
         ) : (
           <div className="space-y-6">
@@ -86,14 +93,14 @@ export function HashtagDetailModal({ hashtagName, onClose }: HashtagDetailModalP
                 </p>
               ) : (
                 <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                  {tweets.map((tweet: any) => (
+                  {tweets.map((tweet: { id: string; text: string; created_at?: string; favorites?: number }) => (
                     <div
                       key={tweet.id}
                       className="border rounded-lg p-4 hover:bg-accent/50 transition-colors"
                     >
                       <p className="text-sm leading-relaxed mb-2">{tweet.text}</p>
                       <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                        {tweet.favorites !== null && (
+                        {tweet.favorites !== null && tweet.favorites !== undefined && (
                           <span>❤️ {tweet.favorites.toLocaleString()}</span>
                         )}
                         {tweet.created_at && (

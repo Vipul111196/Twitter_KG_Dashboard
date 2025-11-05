@@ -50,4 +50,3 @@ export class NetworkData {
   @Field(() => [NetworkEdge], { description: 'Network edges' })
   edges: NetworkEdge[];
 }
-

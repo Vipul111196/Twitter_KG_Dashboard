@@ -7,6 +7,7 @@ import { StatsCard } from '@/components/dashboard/stats-card';
 import { GET_DASHBOARD_STATS, GET_TRENDING_HASHTAGS, GET_TOP_USERS_BY_TWEETS } from '@/lib/graphql/queries';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { DashboardStatsResponse, TrendingHashtagsResponse, TopUsersByTweetsResponse, Hashtag, User } from '@/lib/types';
 
 /**
  * Dashboard Home Page
@@ -16,11 +17,11 @@ import { Skeleton } from '@/components/ui/skeleton';
  */
 
 export default function DashboardPage() {
-  const { data: statsData, loading: statsLoading } = useQuery(GET_DASHBOARD_STATS);
-  const { data: hashtagsData, loading: hashtagsLoading } = useQuery(GET_TRENDING_HASHTAGS, {
+  const { data: statsData, loading: statsLoading } = useQuery<DashboardStatsResponse>(GET_DASHBOARD_STATS);
+  const { data: hashtagsData, loading: hashtagsLoading } = useQuery<TrendingHashtagsResponse>(GET_TRENDING_HASHTAGS, {
     variables: { limit: 5 },
   });
-  const { data: topUsersData, loading: topUsersLoading } = useQuery(GET_TOP_USERS_BY_TWEETS, {
+  const { data: topUsersData, loading: topUsersLoading } = useQuery<TopUsersByTweetsResponse>(GET_TOP_USERS_BY_TWEETS, {
     variables: { limit: 5 },
   });
 
@@ -87,7 +88,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {hashtagsData?.trendingHashtags?.map((hashtag: any, index: number) => (
+                {hashtagsData?.trendingHashtags?.map((hashtag: Hashtag, index: number) => (
                   <div key={hashtag.name} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-muted-foreground">
@@ -96,7 +97,7 @@ export default function DashboardPage() {
                       <span className="font-medium">#{hashtag.name}</span>
                     </div>
                     <span className="text-sm text-muted-foreground">
-                      {hashtag.usageCount.toLocaleString()} tweets
+                      {hashtag.usageCount?.toLocaleString()} tweets
                     </span>
                   </div>
                 ))}
@@ -115,7 +116,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {topUsersData?.topUsersByTweets?.map((user: any, index: number) => (
+                {topUsersData?.topUsersByTweets?.map((user: User, index: number) => (
                   <div key={user.screen_name} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-medium text-muted-foreground w-6">

@@ -24,9 +24,12 @@ export class Neo4jService implements OnModuleInit, OnModuleDestroy {
    * Initialize Neo4j driver on module startup
    */
   async onModuleInit() {
-    const uri = this.configService.get<string>('neo4j.uri') || 'bolt://localhost:7687';
-    const username = this.configService.get<string>('neo4j.username') || 'neo4j';
-    const password = this.configService.get<string>('neo4j.password') || 'password';
+    const uri =
+      this.configService.get<string>('neo4j.uri') || 'bolt://localhost:7687';
+    const username =
+      this.configService.get<string>('neo4j.username') || 'neo4j';
+    const password =
+      this.configService.get<string>('neo4j.password') || 'password';
 
     console.log('🔌 Connecting to Neo4j:', uri);
 
@@ -39,7 +42,9 @@ export class Neo4jService implements OnModuleInit, OnModuleDestroy {
       console.log('✅ Neo4j connection established');
     } catch (error) {
       console.error('❌ Neo4j connection failed:', error);
-      throw new Error(`Failed to connect to Neo4j: ${error.message}`);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Failed to connect to Neo4j: ${errorMessage}`);
     }
   }
 
@@ -54,11 +59,11 @@ export class Neo4jService implements OnModuleInit, OnModuleDestroy {
    * const result = await neo4jService.executeQuery(
    *   'MATCH (u:User {screen_name: $screenName}) RETURN u',
    *   { screenName: 'neo4j' }
-   * );  
+   * );
    */
   async executeQuery(
     query: string,
-    params: Record<string, any> = {},
+    params: Record<string, unknown> = {},
   ): Promise<QueryResult> {
     let session: Session | null = null;
 
@@ -72,10 +77,12 @@ export class Neo4jService implements OnModuleInit, OnModuleDestroy {
       return result;
     } catch (error) {
       // Fail loudly with clear error message
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       console.error('Neo4j query error:', {
         query,
         params,
-        error: error.message,
+        error: errorMessage,
       });
 
       throw error;
@@ -97,7 +104,9 @@ export class Neo4jService implements OnModuleInit, OnModuleDestroy {
       await this.driver.verifyConnectivity();
       return true;
     } catch (error) {
-      console.error('Neo4j health check failed:', error.message);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.error('Neo4j health check failed:', errorMessage);
       return false;
     }
   }
@@ -110,8 +119,9 @@ export class Neo4jService implements OnModuleInit, OnModuleDestroy {
       await this.driver.close();
       console.log('✅ Neo4j connection closed');
     } catch (error) {
-      console.error('Error closing Neo4j connection:', error.message);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error closing Neo4j connection:', errorMessage);
     }
   }
 }
-

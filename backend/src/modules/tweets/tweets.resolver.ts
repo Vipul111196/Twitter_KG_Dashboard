@@ -108,4 +108,3 @@ export class TweetsResolver {
     return this.tweetsService.getTotalTweetCount();
   }
 }
-
