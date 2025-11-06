@@ -51,4 +51,7 @@ async function bootstrap() {
   console.log(`📊 GraphQL Playground: http://localhost:${port}/graphql`);
 }
 
-void bootstrap();
+bootstrap().catch((error: unknown) => {
+  console.error('Error in bootstrap function', { error });
+  process.exit(1);
+});

@@ -7,12 +7,6 @@ import neo4j, { Driver, Session, QueryResult } from 'neo4j-driver';
  *
  * Manages connection to Neo4j graph database and provides
  * a simple interface for executing Cypher queries.
- *
- * Design principles:
- * - Single Responsibility: Only handles Neo4j connection and query execution
- * - Fail Loudly: All errors are propagated with clear messages
- * - Resource Management: Properly closes sessions and driver
- * - Testability: Uses dependency injection for configuration
  */
 @Injectable()
 export class Neo4jService implements OnModuleInit, OnModuleDestroy {
