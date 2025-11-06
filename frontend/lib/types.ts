@@ -115,3 +115,23 @@ export interface UserStatsResponse {
 export interface NetworkDataResponse {
   networkData: NetworkData;
 }
+
+// Chat types
+export interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  cypherQuery?: string;
+  timestamp: Date;
+}
+
+export interface ChatResponse {
+  answer: string;
+  cypherQuery: string;
+  dataReturned: Record<string, unknown>;
+  executionTime: number;
+}
+
+export interface ChatMutationResponse {
+  chat: ChatResponse;
+}

@@ -2,6 +2,36 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+"""Chat message in conversation history"""
+input ChatMessageInput {
+  """Message content"""
+  content: String!
+
+  """Cypher query if assistant message"""
+  cypherQuery: String
+
+  """Role: user or assistant"""
+  role: String!
+
+  """ISO timestamp of message"""
+  timestamp: String!
+}
+
+"""Chat response with generated answer"""
+type ChatResponse {
+  """Natural language answer"""
+  answer: String!
+
+  """Cypher query that was executed (empty if not needed)"""
+  cypherQuery: String!
+
+  """Data returned from query or intent info"""
+  dataReturned: JSON!
+
+  """Total execution time in milliseconds"""
+  executionTime: Int!
+}
+
 """Dashboard statistics"""
 type DashboardStats {
   """Total hashtags"""
@@ -30,6 +60,22 @@ type HashtagStats {
 
   """Number of tweets using this hashtag"""
   usageCount: Int!
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+type Mutation {
+  """Chat with the Twitter dataset using natural language"""
+  chat(
+    """Last 50 messages of conversation history"""
+    history: [ChatMessageInput!] = []
+
+    """Natural language query"""
+    query: String!
+  ): ChatResponse!
 }
 
 """Network data for graph visualization"""

@@ -10,6 +10,7 @@ import { UsersModule } from './modules/users/users.module';
 import { TweetsModule } from './modules/tweets/tweets.module';
 import { HashtagsModule } from './modules/hashtags/hashtags.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { ChatModule } from './modules/chat/chat.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -37,6 +38,7 @@ import configuration from './config/configuration';
     TweetsModule,
     HashtagsModule,
     AnalyticsModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

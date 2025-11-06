@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, Users, Hash, Network, Home } from "lucide-react";
+import { BarChart3, Users, Hash, Network, Home, MessageSquare } from "lucide-react";
 
 /**
  * Dashboard Sidebar Navigation
@@ -35,6 +35,11 @@ const navItems = [
     name: "Analytics",
     href: "/analytics",
     icon: BarChart3,
+  },
+  {
+    name: "Chat",
+    href: "/chat",
+    icon: MessageSquare,
   },
 ];
 
