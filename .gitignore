@@ -48,3 +48,9 @@ infrastructure/logs/
 # Temporary Documentation
 docs/phase-*-notes/
 
+# Personal Progress Tracking
+PROGRESS.md
+plan.md
+plan.pdf
+Task.txt
+
