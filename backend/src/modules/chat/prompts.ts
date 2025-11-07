@@ -70,6 +70,9 @@ CRITICAL SAFETY RULES:
 - Always include LIMIT clause (max 100, default 20)
 - Use OPTIONAL MATCH for relationships that might not exist
 - Handle NULL values with IS NOT NULL checks
+- DO NOT use parameterized queries ($param syntax) - embed values directly in the query
+- Use single quotes for string literals
+- Use toLower() for case-insensitive string matching
 
 DATABASE SCHEMA:
 
@@ -90,16 +93,17 @@ Relationships:
 - (Tweet)-[:REPLY_TO]->(Tweet) - Tweet is a reply
 - (Tweet)-[:USING]->(Source) - Tweet was posted using a source/client
 
-EXAMPLE QUERIES (Learn from these patterns):
+EXAMPLE QUERIES (Learn from these patterns - embed values directly, NO PARAMETERS):
 
 1. Get user by screen name:
-MATCH (u:User {screen_name: $screenName})
+MATCH (u:User {screen_name: 'elonmusk'})
 RETURN u
+LIMIT 1
 
-2. Search users by name:
+2. Search users by name containing text:
 MATCH (u:User)
-WHERE toLower(u.screen_name) CONTAINS $query
-   OR toLower(u.name) CONTAINS $query
+WHERE toLower(u.screen_name) CONTAINS 'vipul'
+   OR toLower(u.name) CONTAINS 'vipul'
 RETURN u
 ORDER BY u.followers DESC
 LIMIT 10
@@ -120,13 +124,13 @@ LIMIT 10
 
 5. Users by minimum followers:
 MATCH (u:User)
-WHERE u.followers >= $minFollowers
+WHERE u.followers >= 1000000
 RETURN u
 ORDER BY u.followers DESC
 LIMIT 10
 
 6. User statistics:
-MATCH (u:User {screen_name: $screenName})
+MATCH (u:User {screen_name: 'NASA'})
 OPTIONAL MATCH (u)-[:POSTS]->(t:Tweet)
 OPTIONAL MATCH (t)-[:TAGS]->(h:Hashtag)
 RETURN 
@@ -136,37 +140,38 @@ RETURN
   coalesce(u.following, 0) AS followingCount,
   count(DISTINCT h) AS uniqueHashtagsUsed
 
-7. Get followers:
-MATCH (follower:User)-[:FOLLOWS]->(user:User {screen_name: $screenName})
+7. Get followers of a user:
+MATCH (follower:User)-[:FOLLOWS]->(user:User {screen_name: 'NASA'})
 RETURN follower
 ORDER BY follower.followers DESC
 LIMIT 20
 
-8. Get following:
-MATCH (user:User {screen_name: $screenName})-[:FOLLOWS]->(following:User)
+8. Get who a user follows:
+MATCH (user:User {screen_name: 'NASA'})-[:FOLLOWS]->(following:User)
 RETURN following
 ORDER BY following.followers DESC
 LIMIT 20
 
 9. Get tweet by ID:
-MATCH (t:Tweet {id_str: $id})
+MATCH (t:Tweet {id_str: '123456789'})
 RETURN t
+LIMIT 1
 
 10. Get tweets by user:
-MATCH (u:User {screen_name: $screenName})-[:POSTS]->(t:Tweet)
+MATCH (u:User {screen_name: 'NASA'})-[:POSTS]->(t:Tweet)
 RETURN t
 ORDER BY t.created_at DESC
 LIMIT 20
 
 11. Get tweets by hashtag:
-MATCH (t:Tweet)-[:TAGS]->(h:Hashtag {name: $hashtagName})
+MATCH (t:Tweet)-[:TAGS]->(h:Hashtag {name: 'AI'})
 RETURN t
 ORDER BY t.created_at DESC
 LIMIT 20
 
-12. Search tweets:
+12. Search tweets containing text:
 MATCH (t:Tweet)
-WHERE toLower(t.text) CONTAINS toLower($query)
+WHERE toLower(t.text) CONTAINS 'neo4j'
 RETURN t
 ORDER BY t.created_at DESC
 LIMIT 20
@@ -179,10 +184,11 @@ ORDER BY t.created_at DESC
 LIMIT 20
 
 14. Tweet with relationships:
-MATCH (t:Tweet {id_str: $id})
+MATCH (t:Tweet {id_str: '123456789'})
 OPTIONAL MATCH (u:User)-[:POSTS]->(t)
 OPTIONAL MATCH (t)-[:TAGS]->(h:Hashtag)
 RETURN t, u AS author, collect(DISTINCT h) AS hashtags
+LIMIT 1
 
 15. Trending hashtags:
 MATCH (t:Tweet)-[:TAGS]->(h:Hashtag)
@@ -203,8 +209,8 @@ RETURN userCount, tweetCount, hashtagCount, count(r) AS relCount
 
 17. Network data for visualization:
 MATCH path = (u1:User)-[:FOLLOWS]->(u2:User)-[:FOLLOWS]->(u3:User)
-WHERE u1.followers >= $minFollowers 
-  AND u2.followers >= $minFollowers
+WHERE u1.followers >= 10000 
+  AND u2.followers >= 10000
 WITH DISTINCT u1, u2, u3          
 LIMIT 25
 OPTIONAL MATCH (u1)-[:POSTS]->(t:Tweet)
@@ -227,7 +233,7 @@ MATCH (h:Hashtag)
 RETURN count(h) AS count
 
 QUERY GENERATION RULES:
-1. Always use parameters ($ syntax) instead of hardcoding values
+1. Embed values directly in queries - DO NOT use parameters ($ syntax)
 2. Always include LIMIT clause (default 20, max 100)
 3. Use OPTIONAL MATCH when relationships might not exist
 4. Use coalesce() for NULL handling
@@ -238,6 +244,12 @@ QUERY GENERATION RULES:
 9. Use DISTINCT to avoid duplicates
 10. Use WITH clause to chain query parts
 
+CRITICAL REMINDER:
+- Extract any names, values, or text from the user's question and embed them directly in the query
+- Use single quotes for strings: 'example'
+- Use toLower() for case-insensitive matching: WHERE toLower(u.name) CONTAINS 'vipul'
+- NO PARAMETERS - embed all values directly!
+
 RESPONSE FORMAT:
 Generate ONLY the Cypher query. No explanation, no markdown, just the raw Cypher query.
 
@@ -247,6 +259,9 @@ You respond: MATCH (u:User) WHERE u.followers IS NOT NULL RETURN u ORDER BY u.fo
 
 User asks: "Show me tweets about Neo4j"
 You respond: MATCH (t:Tweet) WHERE toLower(t.text) CONTAINS 'neo4j' RETURN t ORDER BY t.created_at DESC LIMIT 20
+
+User asks: "Find users with name Vipul"
+You respond: MATCH (u:User) WHERE toLower(u.name) CONTAINS 'vipul' OR toLower(u.screen_name) CONTAINS 'vipul' RETURN u ORDER BY u.followers DESC LIMIT 20
 
 User asks: "What are the trending hashtags?"
 You respond: MATCH (t:Tweet)-[:TAGS]->(h:Hashtag) WITH h, count(t) AS usage RETURN h.name, usage ORDER BY usage DESC LIMIT 10

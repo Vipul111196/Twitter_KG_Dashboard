@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useQuery } from "@apollo/client/react";
 import {
   User as UserIcon,
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TweetDetailModal } from "./tweet-detail-modal";
 import {
   GET_USER_BY_SCREEN_NAME,
   GET_USER_TWEETS,
@@ -48,6 +50,8 @@ export function UserDetailModal({
   open,
   onClose,
 }: UserDetailModalProps) {
+  const [selectedTweet, setSelectedTweet] = useState<string | null>(null);
+
   const { data: userData, loading: userLoading } = useQuery<UserResponse>(
     GET_USER_BY_SCREEN_NAME,
     {
@@ -189,8 +193,12 @@ export function UserDetailModal({
                       created_at?: string;
                       favorites?: number;
                     }) => (
-                      <Card key={tweet.id} className="p-4">
-                        <p className="text-sm">{tweet.text}</p>
+                      <Card 
+                        key={tweet.id} 
+                        className="p-4 cursor-pointer hover:bg-accent transition-colors"
+                        onClick={() => setSelectedTweet(tweet.id)}
+                      >
+                        <p className="text-sm line-clamp-3">{tweet.text}</p>
                         {tweet.created_at && (
                           <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                             <Calendar className="h-3 w-3" />
@@ -266,6 +274,12 @@ export function UserDetailModal({
           </div>
         )}
       </DialogContent>
+
+      {/* Tweet Detail Modal */}
+      <TweetDetailModal
+        tweetId={selectedTweet}
+        onClose={() => setSelectedTweet(null)}
+      />
     </Dialog>
   );
 }

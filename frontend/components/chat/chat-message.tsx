@@ -6,6 +6,7 @@
 'use client';
 
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
 import { Message } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 
@@ -29,7 +30,23 @@ export function ChatMessage({ message }: ChatMessageProps) {
       >
         <div className="space-y-2">
           {/* Message content */}
-          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+          <div className="text-sm markdown-content">
+            <ReactMarkdown
+              components={{
+                p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+                em: ({ children }) => <em className="italic">{children}</em>,
+                ul: ({ children }) => <ul className="list-disc list-inside mb-2">{children}</ul>,
+                ol: ({ children }) => <ol className="list-decimal list-inside mb-2">{children}</ol>,
+                li: ({ children }) => <li className="mb-1">{children}</li>,
+                code: ({ children }) => (
+                  <code className="bg-background/50 px-1 py-0.5 rounded text-xs">{children}</code>
+                ),
+              }}
+            >
+              {message.content}
+            </ReactMarkdown>
+          </div>
 
           {/* Show cypher query for assistant messages */}
           {!isUser && message.cypherQuery && (

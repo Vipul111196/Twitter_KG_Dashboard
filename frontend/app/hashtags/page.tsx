@@ -7,6 +7,7 @@ import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
+import { TweetDetailModal } from "@/components/modals/tweet-detail-modal";
 import {
   GET_TRENDING_HASHTAGS,
   GET_TWEETS_BY_HASHTAG,
@@ -26,6 +27,7 @@ import type {
 
 export default function HashtagsPage() {
   const [selectedHashtag, setSelectedHashtag] = useState<string | null>(null);
+  const [selectedTweet, setSelectedTweet] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data: hashtagsData, loading: hashtagsLoading } =
@@ -163,9 +165,10 @@ export default function HashtagsPage() {
                 {tweetsData.tweetsByHashtag.map((tweet) => (
                   <div
                     key={tweet.id}
-                    className="p-4 border rounded-lg hover:bg-accent transition-colors"
+                    className="p-4 border rounded-lg hover:bg-accent transition-colors cursor-pointer"
+                    onClick={() => setSelectedTweet(tweet.id)}
                   >
-                    <p className="text-sm">{tweet.text}</p>
+                    <p className="text-sm line-clamp-3">{tweet.text}</p>
                     <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
                       {tweet.favorites !== null &&
                         tweet.favorites !== undefined && (
@@ -184,6 +187,12 @@ export default function HashtagsPage() {
           </Card>
         </div>
       </div>
+
+      {/* Tweet Detail Modal */}
+      <TweetDetailModal
+        tweetId={selectedTweet}
+        onClose={() => setSelectedTweet(null)}
+      />
     </DashboardLayout>
   );
 }

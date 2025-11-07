@@ -2,10 +2,11 @@
  * Chat Service - RAG Pipeline Implementation
  *
  * Handles:
- * 1. Query translation (NL → Cypher) using GPT-4
- * 2. Query validation and safety checks
- * 3. Cypher execution against Neo4j
- * 4. Response generation using GPT-3.5
+ * 1. Intent classification using GPT-4.1-mini
+ * 2. Query translation (NL → Cypher) using GPT-4.1-mini
+ * 3. Query validation and safety checks
+ * 4. Cypher execution against Neo4j
+ * 5. Response generation using GPT-5-chat-latest
  *
  * Following strict typing rules - NO 'any' types
  */
@@ -87,7 +88,7 @@ export class ChatService {
       const response = await this.callOpenAI(
         CYPHER_GENERATION_SYSTEM_PROMPT,
         prompt,
-        'gpt-4-turbo-preview',
+        'gpt-5-mini-2025-08-07',
       );
 
       const cypherQuery = response.content.trim();
@@ -173,7 +174,7 @@ Please provide a helpful, conversational answer based on the data above.`;
       const response = await this.callOpenAI(
         RESPONSE_GENERATION_SYSTEM_PROMPT,
         prompt,
-        'gpt-3.5-turbo',
+        'gpt-5-chat-latest',
       );
 
       return response.content;
@@ -205,7 +206,7 @@ Please provide a helpful, conversational answer based on the data above.`;
       const response = await this.callOpenAI(
         INTENT_CLASSIFICATION_SYSTEM_PROMPT,
         prompt,
-        'gpt-3.5-turbo',
+        'gpt-5-mini-2025-08-07',
       );
 
       // Parse JSON response with type checking
@@ -269,7 +270,7 @@ Please provide a helpful, conversational answer based on the data above.`;
       const response = await this.callOpenAI(
         CONTEXTUAL_RESPONSE_SYSTEM_PROMPT,
         prompt,
-        'gpt-3.5-turbo',
+        'gpt-5-chat-latest',
       );
 
       return response.content;
@@ -379,8 +380,7 @@ Please provide a helpful, conversational answer based on the data above.`;
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userMessage },
         ],
-        temperature: 0.1, // Low temperature for consistency
-        max_tokens: 500,
+        max_completion_tokens: 500,
       });
 
       const content = completion.choices[0]?.message?.content;

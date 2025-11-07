@@ -7,6 +7,12 @@ jest.mock('@radix-ui/react-slot', () => ({
   Slot: ({ children, ...props }) => React.createElement('div', props, children),
 }));
 
+// Mock react-markdown for tests
+jest.mock('react-markdown', () => ({
+  __esModule: true,
+  default: ({ children }) => React.createElement('div', {}, children),
+}));
+
 // Mock UI components globally
 jest.mock('@/components/ui/card', () => ({
   Card: (props) => React.createElement('div', { 'data-testid': 'card', ...props }),
