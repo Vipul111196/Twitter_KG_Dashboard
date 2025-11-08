@@ -8,6 +8,23 @@ jest.mock("next/navigation", () => ({
 }));
 
 describe("Sidebar", () => {
+  // Mock window.matchMedia
+  beforeAll(() => {
+    Object.defineProperty(window, "matchMedia", {
+      writable: true,
+      value: jest.fn().mockImplementation((query) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+      })),
+    });
+  });
+
   it("should render the logo and title", () => {
     render(<Sidebar />);
 

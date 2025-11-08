@@ -3,31 +3,32 @@
  * Main chat container with message history and input
  */
 
-'use client';
+"use client";
 
-import React, { useState, useRef, useEffect } from 'react';
-import { useMutation } from '@apollo/client/react';
-import { CHAT_MUTATION } from '@/lib/graphql/mutations';
-import { Message, ChatMutationResponse } from '@/lib/types';
-import { ChatMessage } from './chat-message';
-import { ChatInput } from './chat-input';
-import { Card } from '@/components/ui/card';
+import React, { useState, useRef, useEffect } from "react";
+import { useMutation } from "@apollo/client/react";
+import { CHAT_MUTATION } from "@/lib/graphql/mutations";
+import { Message, ChatMutationResponse } from "@/lib/types";
+import { ChatMessage } from "./chat-message";
+import { ChatInput } from "./chat-input";
+import { Card } from "@/components/ui/card";
 
 export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [chatMutation, { loading }] = useMutation<ChatMutationResponse>(CHAT_MUTATION);
+  const [chatMutation, { loading }] =
+    useMutation<ChatMutationResponse>(CHAT_MUTATION);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const handleSend = async (query: string) => {
     // Add user message
     const userMessage: Message = {
       id: `user-${Date.now()}`,
-      role: 'user',
+      role: "user",
       content: query,
       timestamp: new Date(),
     };
@@ -54,7 +55,7 @@ export function ChatInterface() {
         // Add assistant response
         const assistantMessage: Message = {
           id: `assistant-${Date.now()}`,
-          role: 'assistant',
+          role: "assistant",
           content: data.chat.answer,
           cypherQuery: data.chat.cypherQuery,
           timestamp: new Date(),
@@ -65,11 +66,11 @@ export function ChatInterface() {
       // Add error message
       const errorMessage: Message = {
         id: `error-${Date.now()}`,
-        role: 'assistant',
+        role: "assistant",
         content:
           error instanceof Error
             ? `Error: ${error.message}`
-            : 'An unexpected error occurred. Please try again.',
+            : "An unexpected error occurred. Please try again.",
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -83,7 +84,9 @@ export function ChatInterface() {
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-muted-foreground">
             <div className="text-center space-y-2">
-              <h3 className="text-lg font-semibold">Welcome to Twitter Dataset Chat!</h3>
+              <h3 className="text-lg font-semibold">
+                Welcome to Twitter Dataset Chat!
+              </h3>
               <p className="text-sm">
                 Ask me anything about users, tweets, or hashtags.
               </p>
@@ -112,4 +115,3 @@ export function ChatInterface() {
     </div>
   );
 }
-

@@ -2,7 +2,7 @@
  * GraphQL Mutations
  */
 
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 /**
  * Chat mutation - send natural language query with conversation history
@@ -17,4 +17,3 @@ export const CHAT_MUTATION = gql`
     }
   }
 `;
-

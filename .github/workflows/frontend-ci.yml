@@ -31,13 +31,13 @@ jobs:
         working-directory: ./frontend
         run: npm ci
 
-      - name: Run build
-        working-directory: ./frontend
-        run: npm run build
-
       - name: Run format check
         working-directory: ./frontend
         run: npm run format:check
+
+      - name: Run build
+        working-directory: ./frontend
+        run: npm run build
 
       - name: Upload build artifacts
         if: success()

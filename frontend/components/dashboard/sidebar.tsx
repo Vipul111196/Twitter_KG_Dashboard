@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, Users, Hash, Network, Home, MessageSquare, Moon, Sun } from "lucide-react";
+import {
+  BarChart3,
+  Users,
+  Hash,
+  Network,
+  Home,
+  MessageSquare,
+  Moon,
+  Sun,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -49,10 +58,12 @@ export function Sidebar() {
   const pathname = usePathname();
   const [isDark, setIsDark] = useState(() => {
     // Initialize state from localStorage or system preference
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      return savedTheme === 'dark' || (!savedTheme && prefersDark);
+    if (typeof window !== "undefined") {
+      const savedTheme = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
+      return savedTheme === "dark" || (!savedTheme && prefersDark);
     }
     return false;
   });
@@ -60,9 +71,9 @@ export function Sidebar() {
   // Apply dark class on mount and when isDark changes
   useEffect(() => {
     if (isDark) {
-      document.documentElement.classList.add('dark');
+      document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove("dark");
     }
   }, [isDark]);
 
@@ -70,13 +81,13 @@ export function Sidebar() {
   const toggleTheme = () => {
     const newTheme = !isDark;
     setIsDark(newTheme);
-    
+
     if (newTheme) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
     } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
     }
   };
 
@@ -133,7 +144,7 @@ export function Sidebar() {
               </>
             )}
           </Button>
-          
+
           <div>
             <p className="text-xs text-muted-foreground">
               Powered by Neo4j + GraphQL

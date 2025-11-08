@@ -3,8 +3,8 @@
  * RAG-powered chat interface for querying Twitter dataset
  */
 
-import { DashboardLayout } from '@/components/dashboard/dashboard-layout';
-import { ChatInterface } from '@/components/chat/chat-interface';
+import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
+import { ChatInterface } from "@/components/chat/chat-interface";
 
 export default function ChatPage() {
   return (
@@ -24,4 +24,3 @@ export default function ChatPage() {
     </DashboardLayout>
   );
 }
-

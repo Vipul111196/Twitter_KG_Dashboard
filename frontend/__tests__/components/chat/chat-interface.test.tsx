@@ -7,16 +7,15 @@
  * 3. Manual testing
  */
 
-import { ChatInterface } from '@/components/chat/chat-interface';
+import { ChatInterface } from "@/components/chat/chat-interface";
 
-describe('ChatInterface', () => {
-  it('should be defined and exportable', () => {
+describe("ChatInterface", () => {
+  it("should be defined and exportable", () => {
     expect(ChatInterface).toBeDefined();
-    expect(typeof ChatInterface).toBe('function');
+    expect(typeof ChatInterface).toBe("function");
   });
-  
-  it('should be a valid React component', () => {
-    expect(ChatInterface.name).toBe('ChatInterface');
+
+  it("should be a valid React component", () => {
+    expect(ChatInterface.name).toBe("ChatInterface");
   });
 });
-

@@ -11,6 +11,8 @@ pnpm-debug.log*
 .env.development.local
 .env.test.local
 .env.production.local
+*.env
+!.env.example
 
 # Build outputs
 dist/
@@ -37,9 +39,15 @@ Thumbs.db
 *.log
 logs/
 
-# Neo4j data
+# Docker volumes (local development)
+docker-compose.override.yml
+
+# Neo4j data (SENSITIVE - Database files)
 infrastructure/data/
 infrastructure/logs/
+neo4j_data/
+neo4j_logs/
+*-neo4j-data/
 
 # Temporary files
 *.tmp

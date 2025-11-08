@@ -1,0 +1,16 @@
+node_modules
+.next
+out
+coverage
+.env
+.env.*
+npm-debug.log*
+.DS_Store
+*.log
+__tests__
+e2e
+test-results
+playwright.config.ts
+jest.config.cjs
+jest.setup.js
+

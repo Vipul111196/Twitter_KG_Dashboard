@@ -193,8 +193,8 @@ export function UserDetailModal({
                       created_at?: string;
                       favorites?: number;
                     }) => (
-                      <Card 
-                        key={tweet.id} 
+                      <Card
+                        key={tweet.id}
                         className="p-4 cursor-pointer hover:bg-accent transition-colors"
                         onClick={() => setSelectedTweet(tweet.id)}
                       >

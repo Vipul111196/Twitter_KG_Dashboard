@@ -37,17 +37,24 @@ const QUERY_TIMEOUT_MS = 30000; // 30 seconds
 
 @Injectable()
 export class ChatService {
-  private openai: OpenAI;
+  private openai: OpenAI | null;
+  private isConfigured: boolean;
 
   constructor(
     private readonly neo4jService: Neo4jService,
     private readonly configService: ConfigService,
   ) {
     const apiKey = this.configService.get<string>('OPENAI_API_KEY');
-    if (!apiKey) {
-      throw new Error('OPENAI_API_KEY is not configured');
+    this.isConfigured = !!apiKey && apiKey.length > 0;
+
+    if (!this.isConfigured) {
+      console.warn(
+        '⚠️  OPENAI_API_KEY is not configured - Chat features will be disabled',
+      );
+      this.openai = null;
+    } else {
+      this.openai = new OpenAI({ apiKey });
     }
-    this.openai = new OpenAI({ apiKey });
   }
 
   /**
@@ -288,6 +295,12 @@ Please provide a helpful, conversational answer based on the data above.`;
     userQuery: string,
     history: ChatMessage[] = [],
   ): Promise<ChatResponse> {
+    if (!this.isConfigured) {
+      throw new Error(
+        'Chat service is not configured. Please set OPENAI_API_KEY environment variable.',
+      );
+    }
+
     const startTime = Date.now();
 
     try {
@@ -373,6 +386,10 @@ Please provide a helpful, conversational answer based on the data above.`;
     userMessage: string,
     model: string,
   ): Promise<OpenAICompletionResponse> {
+    if (!this.openai) {
+      throw new Error('OpenAI client not initialized');
+    }
+
     try {
       const completion = await this.openai.chat.completions.create({
         model,

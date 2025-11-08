@@ -11,25 +11,9 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   // Enable CORS for frontend
-  // Allow multiple origins in development (localhost + local IP)
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
   app.enableCors({
-    origin: (
-      origin: string | undefined,
-      callback: (error: Error | null, allow?: boolean) => void,
-    ) => {
-      const allowedOrigins = [
-        'http://localhost:3002',
-        'http://127.0.0.1:3002',
-        'http://192.168.2.117:3002', // Local network IP
-      ];
-
-      // Allow requests with no origin (like Postman, curl)
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: [frontendUrl, 'http://localhost:3000', 'http://127.0.0.1:3000'],
     credentials: true,
   });
 

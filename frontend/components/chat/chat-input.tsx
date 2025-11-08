@@ -3,11 +3,11 @@
  * Input field and send button for chat queries
  */
 
-'use client';
+"use client";
 
-import React, { useState, FormEvent } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import React, { useState, FormEvent } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface ChatInputProps {
   onSend: (query: string) => Promise<void>;
@@ -15,7 +15,7 @@ interface ChatInputProps {
 }
 
 export function ChatInput({ onSend, isLoading }: ChatInputProps) {
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -27,16 +27,16 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
 
     try {
       await onSend(trimmedInput);
-      setInput(''); // Clear input after successful send
+      setInput(""); // Clear input after successful send
     } catch (error) {
-      console.error('Failed to send message:', error);
+      console.error("Failed to send message:", error);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      const form = e.currentTarget.closest('form');
+      const form = e.currentTarget.closest("form");
       if (form) {
         form.requestSubmit();
       }
@@ -55,9 +55,8 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
         className="flex-1"
       />
       <Button type="submit" disabled={isLoading || !input.trim()}>
-        {isLoading ? 'Sending...' : 'Send'}
+        {isLoading ? "Sending..." : "Send"}
       </Button>
     </form>
   );
 }
-

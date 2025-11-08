@@ -119,7 +119,7 @@ export interface NetworkDataResponse {
 // Chat types
 export interface Message {
   id: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   cypherQuery?: string;
   timestamp: Date;
