@@ -2,13 +2,12 @@
  * Chat Service - RAG Pipeline Implementation
  *
  * Handles:
- * 1. Intent classification using GPT-4.1-mini
- * 2. Query translation (NL → Cypher) using GPT-4.1-mini
+ * 1. Intent classification using gpt-5-mini
+ * 2. Query translation (NL → Cypher) using gpt-5-mini
  * 3. Query validation and safety checks
  * 4. Cypher execution against Neo4j
- * 5. Response generation using GPT-5-chat-latest
+ * 5. Response generation using gpt-5-chat-latest
  *
- * Following strict typing rules - NO 'any' types
  */
 
 import { Injectable } from '@nestjs/common';
