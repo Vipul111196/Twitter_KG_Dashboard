@@ -143,9 +143,9 @@ To enable the AI-powered chat interface:
 ```bash
 OPENAI_API_KEY=sk-...
 ```
-3. Restart services:
+3. **Recreate the backend container** to load the OpenAI API key variable:
 ```bash
-docker compose restart backend
+docker compose up -d backend
 ```
 
 ---
