@@ -8,7 +8,11 @@ import { UserDetailModal } from "@/components/modals/user-detail-modal";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
-import { gql } from "@apollo/client";
+import {
+  GET_USERS_BY_MIN_FOLLOWERS,
+  GET_TOP_USERS_BY_TWEETS,
+  SEARCH_USERS,
+} from "@/lib/graphql/queries";
 import type {
   User,
   UsersByMinFollowersResponse,
@@ -23,42 +27,6 @@ import type {
  * Shows user profiles with follower counts and profile images.
  * Includes minimum followers filter and click-to-view-details.
  */
-
-const GET_USERS_BY_MIN_FOLLOWERS = gql`
-  query GetUsersByMinFollowers($minFollowers: Int!, $limit: Int = 30) {
-    usersByMinFollowers(minFollowers: $minFollowers, limit: $limit) {
-      screen_name
-      name
-      followers
-      following
-      profile_image_url
-    }
-  }
-`;
-
-const GET_TOP_USERS_BY_TWEETS = gql`
-  query GetTopUsersByTweets($limit: Int = 30) {
-    topUsersByTweets(limit: $limit) {
-      screen_name
-      name
-      followers
-      following
-      profile_image_url
-    }
-  }
-`;
-
-const SEARCH_USERS = gql`
-  query SearchUsers($query: String!, $limit: Int = 20) {
-    searchUsers(query: $query, limit: $limit) {
-      screen_name
-      name
-      followers
-      following
-      profile_image_url
-    }
-  }
-`;
 
 type SortOption = "followers" | "tweets";
 

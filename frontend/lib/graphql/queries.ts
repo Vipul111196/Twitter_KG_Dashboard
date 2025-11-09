@@ -116,12 +116,25 @@ export const GET_FOLLOWING = gql`
   }
 `;
 
+export const GET_USERS_BY_MIN_FOLLOWERS = gql`
+  query GetUsersByMinFollowers($minFollowers: Int!, $limit: Int = 30) {
+    usersByMinFollowers(minFollowers: $minFollowers, limit: $limit) {
+      screen_name
+      name
+      followers
+      following
+      profile_image_url
+    }
+  }
+`;
+
 export const GET_TOP_USERS_BY_TWEETS = gql`
-  query GetTopUsersByTweets($limit: Int = 5) {
+  query GetTopUsersByTweets($limit: Int = 30) {
     topUsersByTweets(limit: $limit) {
       screen_name
       name
       followers
+      following
       profile_image_url
     }
   }
@@ -130,6 +143,17 @@ export const GET_TOP_USERS_BY_TWEETS = gql`
 // ============================================
 // Tweet Queries
 // ============================================
+
+export const GET_TWEET = gql`
+  query GetTweet($tweetId: String!) {
+    tweet(id: $tweetId) {
+      id
+      text
+      created_at
+      favorites
+    }
+  }
+`;
 
 export const GET_TWEETS_BY_USER = gql`
   query GetTweetsByUser($screenName: String!, $limit: Int = 20) {
@@ -195,6 +219,20 @@ export const GET_HASHTAG = gql`
   query GetHashtag($name: String!) {
     hashtag(name: $name) {
       name
+    }
+  }
+`;
+
+export const GET_HASHTAG_DETAILS = gql`
+  query GetHashtagDetails($name: String!) {
+    hashtag(name: $name) {
+      name
+    }
+    tweetsByHashtag(hashtagName: $name, limit: 10) {
+      id
+      text
+      created_at
+      favorites
     }
   }
 `;

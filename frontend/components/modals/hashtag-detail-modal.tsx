@@ -10,22 +10,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { gql } from "@apollo/client";
-// Types are inferred from GraphQL response
-
-const GET_HASHTAG_DETAILS = gql`
-  query GetHashtagDetails($name: String!) {
-    hashtag(name: $name) {
-      name
-    }
-    tweetsByHashtag(hashtagName: $name, limit: 10) {
-      id
-      text
-      created_at
-      favorites
-    }
-  }
-`;
+import { GET_HASHTAG_DETAILS } from "@/lib/graphql/queries";
 
 interface HashtagDetailModalProps {
   hashtagName: string | null;

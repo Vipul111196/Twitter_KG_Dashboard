@@ -10,18 +10,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { gql } from "@apollo/client";
-
-const GET_TWEET = gql`
-  query GetTweet($tweetId: String!) {
-    tweet(id: $tweetId) {
-      id
-      text
-      created_at
-      favorites
-    }
-  }
-`;
+import { GET_TWEET } from "@/lib/graphql/queries";
 
 interface TweetDetailModalProps {
   tweetId: string | null;
