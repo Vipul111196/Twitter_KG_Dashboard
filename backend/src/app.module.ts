@@ -11,17 +11,16 @@ import { TweetsModule } from './modules/tweets/tweets.module';
 import { HashtagsModule } from './modules/hashtags/hashtags.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { ChatModule } from './modules/chat/chat.module';
+import { MetricsModule } from './metrics/metrics.module';
 import configuration from './config/configuration';
 
 @Module({
   imports: [
-    // Configuration module - loads environment variables
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
     }),
 
-    // GraphQL module - Apollo Server
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
@@ -30,10 +29,9 @@ import configuration from './config/configuration';
       introspection: true,
     }),
 
-    // Neo4j database module
     Neo4jModule,
+    MetricsModule,
 
-    // Feature modules
     UsersModule,
     TweetsModule,
     HashtagsModule,
