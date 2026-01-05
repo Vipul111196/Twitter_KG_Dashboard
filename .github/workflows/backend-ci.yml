@@ -89,3 +89,14 @@ jobs:
           name: backend-coverage
           path: backend/coverage
 
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: backend-test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        working-directory: ./backend
+        run: docker build -t twitter-kg-backend:ci .
+

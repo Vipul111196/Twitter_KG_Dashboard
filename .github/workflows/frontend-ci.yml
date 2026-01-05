@@ -46,3 +46,14 @@ jobs:
           name: frontend-build
           path: frontend/.next
 
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: frontend-test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        working-directory: ./frontend
+        run: docker build -t twitter-kg-frontend:ci .
+
