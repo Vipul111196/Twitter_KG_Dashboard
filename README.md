@@ -56,6 +56,11 @@ A full-stack data visualization platform for analyzing Twitter network data usin
 - Automated database initialization
 - Health checks and dependency management
 
+**Monitoring:**
+- Prometheus metrics (`/metrics` endpoint)
+- Grafana dashboards (request rate, latency, GraphQL ops, Neo4j health)
+- Node.js runtime metrics (memory, event loop lag)
+
 ---
 
 ## 🚀 Quick Start
@@ -95,6 +100,9 @@ That's it! The system will automatically:
 - **Frontend Dashboard:** http://localhost:3000
 - **GraphQL Playground:** http://localhost:3001/graphql
 - **Neo4j Browser:** http://localhost:7474
+- **Grafana Dashboard:** http://localhost:3002 (admin / admin)
+- **Prometheus:** http://localhost:9090
+- **Backend Metrics:** http://localhost:3001/metrics
 
 **Neo4j Credentials:**
 - Username: `neo4j`
@@ -177,24 +185,28 @@ docker compose up -d    # Restart - will reload data
 ### Project Structure
 
 ```
-Dashboard_Project/
-├── frontend/               # Next.js frontend
-│   ├── app/               # App router pages
-│   ├── components/        # React components
-│   ├── lib/              # GraphQL client, types
-│   └── __tests__/        # Jest tests
-├── backend/               # NestJS backend
+Twitter_KG_Dashboard/
+├── frontend/                # Next.js frontend
+│   ├── app/                # App router pages
+│   ├── components/         # React components
+│   ├── lib/               # GraphQL client, types
+│   └── __tests__/         # Jest tests
+├── backend/                # NestJS backend
 │   ├── src/
-│   │   ├── modules/      # Feature modules
-│   │   │   ├── analytics/
-│   │   │   ├── chat/
-│   │   │   └── users/
-│   │   └── main.ts       # App entry point
-│   └── test/             # E2E tests
+│   │   ├── modules/       # Feature modules (users, tweets, hashtags, analytics, chat)
+│   │   ├── metrics/       # Prometheus metrics (service, controller, interceptor)
+│   │   ├── database/      # Neo4j service
+│   │   └── main.ts        # App entry point
+│   └── test/              # E2E tests
+├── monitoring/             # Observability stack
+│   ├── prometheus.yml     # Prometheus scrape config
+│   └── grafana/           # Grafana provisioning + dashboards
 ├── infrastructure/
-│   └── import/           # Neo4j data and init scripts
-├── docker-compose.yml    # Service orchestration
-└── .env.example         # Environment template
+│   └── import/            # Neo4j data and init scripts
+├── .github/workflows/     # CI/CD (backend + frontend)
+├── docker-compose.yml     # Full stack orchestration
+├── Makefile               # Common commands
+└── .env.example           # Environment template
 ```
 
 ### Local Development (without Docker)
@@ -274,6 +286,41 @@ docker compose ps  # Shows health status
 
 ---
 
+## 📡 Monitoring
+
+The stack includes Prometheus + Grafana for production-grade observability.
+
+### Metrics Exposed
+
+The backend exposes a `/metrics` endpoint with:
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `http_requests_total` | Counter | Total HTTP requests by method, route, status |
+| `http_request_duration_seconds` | Histogram | Request latency (p50, p95, p99) |
+| `graphql_queries_total` | Counter | GraphQL operations by field name |
+| `neo4j_up` | Gauge | Neo4j connection health (1=up, 0=down) |
+| `process_resident_memory_bytes` | Gauge | Node.js memory usage |
+| `nodejs_eventloop_lag_seconds` | Gauge | Event loop lag |
+
+### Grafana Dashboard
+
+Pre-configured dashboard at http://localhost:3002 includes:
+- Request rate and error rate panels
+- p50/p95 latency charts
+- GraphQL operation breakdown
+- Neo4j connection status
+- Process memory and event loop lag
+
+### Quick Commands
+
+```bash
+make up          # Start all services including monitoring
+make monitoring  # Print monitoring URLs
+```
+
+---
+
 ## 🔧 Troubleshooting
 
 ### Port Already in Use
@@ -344,7 +391,8 @@ docker compose up -d
 ### CI/CD
 - GitHub Actions workflows for automated testing
 - Separate workflows for frontend and backend
-- Runs on push and pull requests
+- Docker build verification after tests pass
+- Runs on push and pull requests to `main` and `develop`
 
 ---
 
